@@ -1,0 +1,14 @@
+{
+  "name": "greeter-bot",
+  "version": "1.0.0",
+  "description": "Raybargbababa",
+  "main": "bot.js",
+  "author": "Raybarg",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "flatted": "^2.0.0",
+    "minimist": "^1.2.0",
+    "tedious": "^3.0.1",
+    "winston": "^3.1.0"
+  }
+}
