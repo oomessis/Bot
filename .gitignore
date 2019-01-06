@@ -35,7 +35,6 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
-Bot/node_modules
 
 # TypeScript v1 declaration files
 typings/
@@ -62,4 +61,4 @@ typings/
 .next
 
 # Auth data
-Bot/Auth/
+Auth/
