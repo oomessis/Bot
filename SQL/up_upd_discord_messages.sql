@@ -1,5 +1,5 @@
 /*************************************************************************************
-PURPOSE:        P‰ivitt‰‰ tai lis‰‰ Discord viestej‰
+PURPOSE:        Update/insert procedure for discord message
 HISTORY:        27.10.2018 - Raybarg
 NOTES:
 **************************************************************************************/
@@ -17,7 +17,6 @@ CREATE PROCEDURE [dbo].[up_upd_discord_messages]
 	@strMessage_json nvarchar(max)
 as
 
-	-- P‰ivitet‰‰n
 	UPDATE discord_messages SET
 		server_id=@iServer_id,
 		channel_id=@iChannel_id,
@@ -27,7 +26,6 @@ as
 		message_json=@strMessage_json
 	where message_id = @iMessage_id
 
-	-- Lis‰t‰‰nkˆ
 	IF @@rowcount = 0 BEGIN
 		INSERT INTO discord_messages(
 			server_id,

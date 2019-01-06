@@ -12,7 +12,7 @@ SELECT COUNT(*) AS messageCount FROM discord_messages WHERE person_name = ''
 
 SELECT COUNT(*) AS cnt FROM discord_messages WHERE person_name not like 'Messis Bot'
 
-select count(*) m��r�, person_name from discord_messages 
+select count(*) maara, person_name from discord_messages 
 group by person_name
 order by count(*) desc
 
