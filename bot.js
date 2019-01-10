@@ -9,7 +9,7 @@ var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
 var TYPES = require('tedious').TYPES;
 var sqlAuth = require('./auth/sqlauth.json');
-var BotCommon = require('./Libraries/BotLibrary/botcommon.js')
+var BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 
 var bot = new BotCommon();
 
@@ -32,7 +32,8 @@ messisBot.login(auth.token);
 messisBot.on('message', msg => {
     var bPrivate = false;
     var argv = msg.content.split(' ');
-    
+    var cmd = getCommand(argv[0]);
+
     if(msg.channel instanceof Discord.DMChannel) {
         bPrivate = true;
         //console.log('=== its privachat ===');
@@ -40,40 +41,38 @@ messisBot.on('message', msg => {
         bPrivate = false;
         //console.log('=== ' + msg.channel.name + " ===");
     }
+
+    if (cmd.length > 0) {
+        if(cmd === 'm' && msg.author.username === 'raybarg') {
+            bot.bulkInterval = setInterval(function() { fetchBulkHistory(msg); }, 10000);
     
-    if(msg.content === '!m' && msg.author.username === 'raybarg' && bRunning == false) {
-        bRunning = true;
-        bot.bulkInterval = setInterval(function() { fetchBulkHistory(msg); }, 10000);
-
-    } else if(msg.content === "!s" && msg.author.username === 'raybarg') {
-        bot.getLastID(function(err, lastMsgID) {
-            syncNewMessages(msg, lastMsgID);
-        });
-
-    } else if(msg.content === "!total" && (msg.channel.name === 'koodarit' || msg.channel.name === 'yleinen' || msg.channel instanceof Discord.DMChannel)) {
-        bot.messageCount(function(err, total) {
-            msg.channel.send('#yleinen kanavalla viestejä yhteensä: ' + total.toString());
-        });
-
-    } else if(msg.content === "!channels" && msg.author.username === 'raybarg') {
-        testGetChannels();
-
-    } else if(msg.content === '!ajarooli' && msg.author.username === 'raybarg') {
-        giveLotsofPermissions();
-
-    } else if(argv[0] === '!avatar') {
-        var userName = msg.content.substring(8);
-        userTest(msg, userName);
-
-    } else if(argv[0] === '!stat') {
-        userStat(msg);
-
-    } else if(argv[0] === '!help') {
-        helpSpam(msg);
-
-    } else {
-        //console.log(msg.author.username + ' sano että: ' + msg.content);
-
+        } else if(cmd === "s" && msg.author.username === 'raybarg') {
+            bot.syncInterval = setInterval(function() { syncHistory(msg); }, 1200000);
+    
+        } else if(cmd === "total" && (msg.channel.name === 'koodarit' || msg.channel.name === 'yleinen' || msg.channel instanceof Discord.DMChannel)) {
+            bot.messageCount(function(err, total) {
+                msg.channel.send('#yleinen kanavalla viestejä yhteensä: ' + total.toString());
+            });
+    
+        } else if(cmd === "channels" && msg.author.username === 'raybarg') {
+            testGetChannels();
+    
+        } else if(cmd === 'ajarooli' && msg.author.username === 'raybarg') {
+            giveLotsofPermissions();
+    
+        } else if(cmd === 'avatar') {
+            var userName = msg.content.substring(8);
+            userTest(msg, userName);
+    
+        } else if(cmd === 'stat') {
+            userStat(msg);
+    
+        } else if(cmd === 'help') {
+            helpSpam(msg);
+    
+        } else {
+    
+        }
     }
 });
 
@@ -99,6 +98,16 @@ function fetchBulkHistory(msg) {
 }
 
 /**
+ * Intervaalikutsu uusien viestien synccaukseen
+ * @param {*} msg 
+ */
+function syncHistory(msg) {
+    bot.getLastID(function(err, lastMsgID) {
+        syncNewMessages(msg, lastMsgID);
+    });
+}
+
+/**
  * Hakee lastMsgID tokenin jälkeen tulleet uudet viestit
  * @param {*} msg Discordin viestiolio, tästä tiedetään minne kanavalle annetaan vastaus
  * @param {*} lastMsgID Tokeni jonka jälkeen tulleita viestejä haetaan
@@ -107,6 +116,9 @@ function syncNewMessages(msg, lastMsgID) {
     const targetChannel = messisBot.channels.get(auth.yleinen);
     targetChannel.fetchMessages({ limit: bot.maxFetch, after: lastMsgID }).then(messages => {
         console.log(messages.size.toString() + " / " + bot.maxFetch.toString());
+        if (messages.size > 0) {
+            logEvent("Syncronoitu viestejä: " + messages.size.toString() + " / " + bot.maxFetch.toString());
+        }
         var msgArr = messages.array();
         for(var i = 0; i < msgArr.length; i++ ) {
             saveMessage(msgArr[i]);
@@ -160,25 +172,40 @@ function testGetChannels() {
     });
 }
 
+/**
+ * Annetaan kaikille guildin jäsenille yleisrooli
+ */
 function giveLotsofPermissions() {
     const target = messisBot.guilds.get(auth.messis);
     console.log(target);
     target.members.filter(m => !m.user.bot && !m.roles.has(auth.yleisrooli)).map(async member => await member.addRole(auth.yleisrooli).catch(console.error));
 }
 
+/**
+ * Näyttää privaviestinä jäsenen avatar-urlin komennon antajalle
+ * @param {*} msg 
+ * @param {*} u 
+ */
 function userTest(msg, u) {
-    console.log("Avatar käyttäjästä " + u + " : " + msg.author.username);
+    logEvent("Avatar käyttäjästä " + u + " : " + msg.author.username);
     const guild = messisBot.guilds.get(auth.messis);
     guild.members.filter(m => m.user.username === u).map(member => {
         msg.author.send(u + ' käyttäjän avatar url: ' + member.user.avatarURL);
     });
 }
 
+/**
+ * Statistiikkaa, kertoo montako viestiä on kanavalla ja montako kutsun antaneella jäsenellä
+ * @param {*} msg 
+ */
 function userStat(msg) {
-    console.log("Statistiikkaa käyttäjälle: " + msg.author.username);
+    logEvent("Statistiikkaa käyttäjälle: " + msg.author.username);
     bot.getLastID(function(err, lastMsgID) {
         syncNewMessages(msg, lastMsgID);
         bot.messageCount(function(err, total) {
+            if (err) {
+
+            }
             bot.userMessageCount(msg.author.username, function(err, totalUser) {
                 var reply = {embed: {
                     color: 3447003,
@@ -194,8 +221,12 @@ function userStat(msg) {
     });
 }
 
+/**
+ * Lähetetään privaviestinä helppilistaus botin ymmärtämistä komennoista
+ * @param {*} msg 
+ */
 function helpSpam(msg) {
-    console.log("Helppilistaus käyttäjälle: " + msg.author.username);
+    logEvent("Helppilistaus käyttäjälle: " + msg.author.username);
     var reply = {embed: {
         color: 3447003,
         title: "Messis Bot Komentolistaus",
@@ -205,4 +236,23 @@ function helpSpam(msg) {
         ]
     }};
     msg.author.send(reply);
+}
+
+/**
+ * Prefiksin käsittely, parsitaan itse komento, palautetaan tyhjä jos prefix ei täsmää
+ * @param {*} arg 
+ */
+function getCommand(arg) {
+    if (arg.substring(0,1) === auth.prefix) {
+        return arg.substring(1);
+    }
+    return '';
+}
+
+/**
+ * Logitusviesti bottien omalle logituskanavalle
+ * @param {*} msg 
+ */
+function logEvent(msg) {
+    messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(msg));
 }

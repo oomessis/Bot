@@ -43,6 +43,16 @@ class BotCommon {
         return this._bulkInterval;
     }
 
+    /**
+     * Tokeni intervalille jolla haetaan syncronointia viestimaarista
+     */
+    set syncInterval(value) {
+        this._syncInterval = value;
+    }
+    get syncInterval() {
+        return this._syncInterval;
+    }
+
     getLastID(callback) {
         this._DB.fetchLastID(function(err, lastID) {
             callback(null, lastID);
