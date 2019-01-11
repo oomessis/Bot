@@ -22,4 +22,3 @@ select datepart(hour, message_date)-2 as hh, count(*) as maara from discord_mess
 
 select message_date from discord_messages
 
-select cast(message_date as date) as dt, count(*) as cnt from discord_messages group by cast(message_date as date) order by cast(message_date as date)

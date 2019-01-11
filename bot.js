@@ -153,6 +153,7 @@ function saveMessage(message) {
             request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
             // JSON.stringify() kaatuu circular poikkeukseen discord.message-objektin kanssa, util.inspect() tekee json muodon myös
             request.addParameter('strMessage_json', TYPES.NVarChar, Flatted.stringify(message));
+            request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
             con.callProcedure(request);
         }
     });
@@ -163,12 +164,23 @@ function saveMessage(message) {
  */
 function testGetChannels() {
     messisBot.guilds.forEach((guild) => {
-        console.log(" - " + guild.name);
+        if (guild.id === auth.messis) {
+            var spam = '';
+            var count = 0;
+            console.log(" - " + guild.name);
 
-        // kanavat
-        guild.channels.forEach((channel) => {
-            console.log(` -- ${channel.name} (${channel.type}) - ${channel.id}`);
-        });
+            // kanavat
+            guild.channels.forEach((channel) => {
+                if (channel.type !== 'category' && channel.type !== 'voice') {
+                    spam += ` -- ${channel.name} (${channel.type}) - ${channel.id}\n`;
+                    saveChannel(guild.id, channel);
+                    count++;
+                }
+            });
+            //logEvent(spam.substring(0,1999));
+            logEvent(count.toString() + ' kanavaa päivitetty tietokantaan.');
+            console.log(spam);
+        }
     });
 }
 
@@ -255,4 +267,31 @@ function getCommand(arg) {
  */
 function logEvent(msg) {
     messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(msg));
+}
+
+/**
+ * Tallentaa yhden kanavan tiedon tietokantaan
+ * @param {*} guild Guild ID
+ * @param {*} channel Kanavan olio
+ */
+function saveChannel(guild, channel) {
+    var con = new Connection(sqlConfig);
+    con.on('connect', function(err) {
+        if (err) {
+            console.log(err);
+        } else {
+            var request = new Request('up_upd_discord_channels', function(err) {
+                if (err) {
+                    console.log(err);
+                }
+                con.close();
+            });
+            request.addParameter('iDiscord_channel_id', TYPES.Int, 0);
+            request.addParameter('iServer_id', TYPES.NVarChar, guild.toString());
+            request.addParameter('iChannel_id', TYPES.NVarChar, channel.id.toString());
+            request.addParameter('strChannel_name', TYPES.NVarChar, channel.name.toString());
+            request.addParameter('bChannel_tracked', TYPES.NVarChar, 0);
+            con.callProcedure(request);
+        }
+    });
 }

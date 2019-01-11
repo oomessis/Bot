@@ -3,10 +3,10 @@ PURPOSE:        Establish table for Discord messages
 HISTORY:        27.10.2018 - Raybarg
 NOTES:          -
 *********************************************************************/
-drop table discord_messages
 IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[discord_messages]') AND objectproperty(id, N'isusertable') =1)
 BEGIN
-	SET NOCOUNT ON
+	IF ISNULL(columnproperty( object_id(N'[discord_messages]'),'message_text','precision'),0)=0
+		alter table [discord_messages] add [message_text] NVARCHAR(2000) null
 END
 ELSE
 BEGIN
@@ -18,7 +18,8 @@ BEGIN
 		[message_id] nvarchar(50) NOT NULL,					-- message ID
 		[message_date] datetime NOT NULL,					-- Message date
 		[person_name] nvarchar(50) NOT NULL,				-- Message author name
-		[message_json] nvarchar(max) NOT NULL
+		[message_json] nvarchar(max) NOT NULL,
+		[message_text] nvarchar(2000) NULL					-- Message text
 	) ON [primary]
 END
 GO
