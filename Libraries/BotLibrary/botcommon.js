@@ -71,5 +71,11 @@ class BotCommon {
         });
     }
 
+    parroExists(userID, msgID, callback) {
+        this._DB.parroExists(userID, msgID, function(err, parrotID) {
+            callback(null, parrotID);
+        });
+    }
+
 }
 module.exports = BotCommon;

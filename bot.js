@@ -40,9 +40,14 @@ messisBot.on('raw', packet => {
             const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
             const reaction = message.reactions.get(emoji);
             if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'parrot') {
-                saveParrot(message);
-                logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
-                toimitusPapukaija(message.author.username + ' / #' + message.channel.name + '\n' + message.url);
+                //this.parroExists(message.author.id, message.id)
+                bot.parroExists(message.author.id, message.id, function(err, parrotID) {
+                    if(parrotID === -1) {
+                        saveParrot(message);
+                        logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
+                        toimitusPapukaija(message.author.username + ' / #' + message.channel.name + '\n' + message.url);
+                    }
+                });                
             }
         });
     }
@@ -345,3 +350,4 @@ function saveParrot(message) {
 function toimitusPapukaija(msg) {
     messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
 }
+

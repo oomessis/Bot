@@ -101,5 +101,35 @@ class DataBase {
         });
     }
 
+    /**
+     * Hakee tietokannasta viimeisimmän viestin tokenin
+     * @param {*} callback 
+     */
+    parroExists(userID, msgID, callback) {
+        var parrotID = -1;
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select parrot_id from parrots where user_id = '" + userID + "' and message_id = '" + msgID + "'", function(err, rowCount) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, parrotID);
+                });
+                this._request.on('row', function(columns) {
+                    columns.forEach(function(column) {
+                        if (column.value !== null) {
+                            parrotID = column.value;
+                        }
+                    });
+                });
+                con.execSql(this._request);
+            }
+        });
+    }    
+
 }
 module.exports = DataBase;
