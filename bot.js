@@ -29,6 +29,25 @@ messisBot.on('ready', () => {
 messisBot.on('error', () => console.log('errored'));
 messisBot.login(auth.token);
 
+// Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
+messisBot.on('raw', packet => {
+    const guild = messisBot.guilds.get(auth.messis);
+    if (!['MESSAGE_REACTION_ADD'].includes(packet.t)) return;
+    const channel = messisBot.channels.get(packet.d.channel_id);
+    const member = guild.members.get(packet.d.user_id);
+    if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
+        channel.fetchMessage(packet.d.message_id).then(message => {
+            const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+            const reaction = message.reactions.get(emoji);
+            if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'parrot') {
+                saveParrot(message);
+                logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
+                toimitusPapukaija(message.author.username + ' / #' + message.channel.name + '\n' + message.url);
+            }
+        });
+    }
+});
+
 messisBot.on('message', msg => {
     var bPrivate = false;
     var argv = msg.content.split(' ');
@@ -36,10 +55,8 @@ messisBot.on('message', msg => {
 
     if(msg.channel instanceof Discord.DMChannel) {
         bPrivate = true;
-        //console.log('=== its privachat ===');
     } else {
         bPrivate = false;
-        //console.log('=== ' + msg.channel.name + " ===");
     }
 
     if (cmd.length > 0) {
@@ -48,11 +65,6 @@ messisBot.on('message', msg => {
     
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
             bot.syncInterval = setInterval(function() { syncHistory(msg); }, 1200000);
-    
-        } else if(cmd === "total" && (msg.channel.name === 'koodarit' || msg.channel.name === 'yleinen' || msg.channel instanceof Discord.DMChannel)) {
-            bot.messageCount(function(err, total) {
-                msg.channel.send('#yleinen kanavalla viestejä yhteensä: ' + total.toString());
-            });
     
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
@@ -177,7 +189,6 @@ function testGetChannels() {
                     count++;
                 }
             });
-            //logEvent(spam.substring(0,1999));
             logEvent(count.toString() + ' kanavaa päivitetty tietokantaan.');
             console.log(spam);
         }
@@ -294,4 +305,43 @@ function saveChannel(guild, channel) {
             con.callProcedure(request);
         }
     });
+}
+
+/**
+ * Tallentaa yhden papukaijan tietokantaan
+ * @param {*} message Viestin olio
+ */
+function saveParrot(message) {
+    var con = new Connection(sqlConfig);
+    con.on('connect', function(err) {
+        if (err) {
+            console.log(err);
+        } else {
+            var request = new Request('up_upd_parrot', function(err) {
+                if (err) {
+                    console.log(err);
+                }
+                con.close();
+            });
+            // Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
+            var d = message.createdAt;
+            var dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+            request.addParameter('iParrot_id', TYPES.Int, 0);
+            request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
+            request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
+            request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
+            request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
+            request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
+            request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0,199));
+            con.callProcedure(request);
+        }
+    });
+}
+
+/**
+ * Logitusviesti bottien omalle logituskanavalle
+ * @param {*} msg 
+ */
+function toimitusPapukaija(msg) {
+    messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
 }
