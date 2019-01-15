@@ -39,7 +39,7 @@ messisBot.on('raw', packet => {
         channel.fetchMessage(packet.d.message_id).then(message => {
             const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
             const reaction = message.reactions.get(emoji);
-            if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'parrot') {
+            if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'pabadge') {
                 //this.parroExists(message.author.id, message.id)
                 bot.parroExists(message.author.id, message.id, function(err, parrotID) {
                     if(parrotID === -1) {
