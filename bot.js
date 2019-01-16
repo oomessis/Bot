@@ -140,7 +140,7 @@ function wordCount(msg, strSearch) {
         });
         if(!(msg.channel instanceof Discord.DMChannel)) {
             // Komennon poisto ei toimi privachatissa
-            msg.delete(2000);
+            //msg.delete(2000);
         }
     });
 }
@@ -273,9 +273,12 @@ function userStat(msg) {
                     ]
                 }};
                 msg.channel.send(reply).then(sentMsg => {
-                    sentMsg.delete(30000);
+                    //sentMsg.delete(30000);
                 });
-                msg.delete(2000);
+                if(!(msg.channel instanceof Discord.DMChannel)) {
+                    // Komennon poisto ei toimi privachatissa
+                    msg.delete(2000);
+                }
             });
         });
     });

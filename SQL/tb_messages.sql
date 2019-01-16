@@ -18,7 +18,6 @@ BEGIN
 		[message_id] nvarchar(50) NOT NULL,					-- message ID
 		[message_date] datetime NOT NULL,					-- Message date
 		[person_name] nvarchar(50) NOT NULL,				-- Message author name
-		[message_json] nvarchar(max) NOT NULL,
 		[message_text] nvarchar(2000) NULL					-- Message text
 	) ON [primary]
 END
