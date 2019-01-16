@@ -122,22 +122,26 @@ function fetchBulkHistory(msg) {
 
 /**
  * Haetaan lista montako kertaa sana toistuu eri kanavilla
+ * @param {*} msg 
+ * @param {*} strSearch 
  */
 function wordCount(msg, strSearch) {
     const embed = new Discord.RichEmbed();
-    var chanList = '';
+    var chanList = '(tämä viesti poistuu 30 sekunnin kuluttua)\n\n';
     bot.wordCount(strSearch, function(err, rows) {
         embed.setTitle('Montakokertaa sana \"**' + strSearch + '**\" esiintyy kanavilla.');
         embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
-        console.log(messisBot);
         rows.forEach(cols => {
             chanList += cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
         });
         embed.setDescription(chanList);
         msg.channel.send(embed).then(sentMsg => {
-            sentMsg.delete(20000)
+            sentMsg.delete(30000);
         });
-        msg.delete(2000);
+        if(!(msg.channel instanceof Discord.DMChannel)) {
+            // Komennon poisto ei toimi privachatissa
+            msg.delete(2000);
+        }
     });
 }
 
@@ -285,6 +289,7 @@ function helpSpam(msg) {
         title: "Messis Bot Komentolistaus",
         fields: [
             { name: "!stat", value: "Oma käyttäjästatistiikkasi joka lähetetään privaattiviestinä.", inline: true},
+            { name: "!sana esimerkki", value: "Kanavakohtaine tilasto miten paljon sanaa 'esimerkkiä on käytetty.", inline: true},
             { name: "!avatar käyttäjänimi", value: "Hakee annetulle käyttäjänimelle avatar-linkin ja lähettää sen privaattiviestinä. Käyttäjänimi pitää olla discord-tilin oikea käyttäjänimi (ei näkyvä nimi) ja sen on oltava case-sensitiivinen.\nEsim. !avatar raybarg\nKomento ei kerro mitään jos käyttäjän nimellä ei löytynyt profiilia.", inline: true}
         ]
     }};

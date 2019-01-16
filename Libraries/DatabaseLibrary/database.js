@@ -150,7 +150,7 @@ class DataBase {
                     con.close();
                     callback(null, retval);
                 });
-                this._request.addParameter('strSearch', TYPES.NVarChar, searchWord);
+                this._request.addParameter('strSearch', TYPES.NVarChar, searchWord.substring(0,199));
                 this._request.on('row', function(columns) {
                     retval.push(columns);
                 });
