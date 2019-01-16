@@ -129,7 +129,7 @@ function wordCount(msg, strSearch) {
     const embed = new Discord.RichEmbed();
     var chanList = '';
     bot.wordCount(strSearch, function(err, rows) {
-        embed.setTitle('Montakokertaa sana \"**' + strSearch + '**\" esiintyy kanavilla.');
+        embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla:');
         embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
         rows.forEach(cols => {
             chanList += cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
