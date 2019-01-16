@@ -22,3 +22,9 @@ select datepart(hour, message_date)-2 as hh, count(*) as maara from discord_mess
 
 select message_date from discord_messages
 
+select * from discord_channels
+
+select * from parrots where user_id = '' and message_id = ''
+
+
+--delete from parrots

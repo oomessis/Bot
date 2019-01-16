@@ -77,5 +77,11 @@ class BotCommon {
         });
     }
 
+    wordCount(strSearch, callback) {
+        this._DB.wordCount(strSearch, function(err, rows) {
+            callback(null, rows);
+        });
+    }
+
 }
 module.exports = BotCommon;

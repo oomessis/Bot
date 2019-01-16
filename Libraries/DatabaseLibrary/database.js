@@ -129,7 +129,35 @@ class DataBase {
                 con.execSql(this._request);
             }
         });
-    }    
+    }
+
+    /**
+     * Laskee montako kertaa hakusana esiintyy
+     * @param {*} searchWord 
+     * @param {*} callback 
+     */
+    wordCount(searchWord, callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("up_sel_wordcount", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
+                this._request.addParameter('strSearch', TYPES.NVarChar, searchWord);
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.callProcedure(this._request);
+            }
+        });
+    }
 
 }
 module.exports = DataBase;

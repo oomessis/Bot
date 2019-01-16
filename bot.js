@@ -30,26 +30,28 @@ messisBot.on('error', () => console.log('errored'));
 messisBot.login(auth.token);
 
 // Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
+// Suoritetaan vain joso botti ei ole development versio
 messisBot.on('raw', packet => {
-    const guild = messisBot.guilds.get(auth.messis);
-    if (!['MESSAGE_REACTION_ADD'].includes(packet.t)) return;
-    const channel = messisBot.channels.get(packet.d.channel_id);
-    const member = guild.members.get(packet.d.user_id);
-    if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
-        channel.fetchMessage(packet.d.message_id).then(message => {
-            const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-            const reaction = message.reactions.get(emoji);
-            if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
-                //this.parroExists(message.author.id, message.id)
-                bot.parroExists(message.author.id, message.id, function(err, parrotID) {
-                    if(parrotID === -1) {
-                        saveParrot(message);
-                        logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
-                        toimitusPapukaija(message.author.username + ' / #' + message.channel.name + '\n' + message.url);
-                    }
-                });                
-            }
-        });
+    if (auth.dev === 0) {
+        const guild = messisBot.guilds.get(auth.messis);
+        if (!['MESSAGE_REACTION_ADD'].includes(packet.t)) return;
+        const channel = messisBot.channels.get(packet.d.channel_id);
+        const member = guild.members.get(packet.d.user_id);
+        if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
+            channel.fetchMessage(packet.d.message_id).then(message => {
+                const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+                const reaction = message.reactions.get(emoji);
+                if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
+                    bot.parroExists(message.author.id, message.id, function(err, parrotID) {
+                        if(parrotID === -1) {
+                            saveParrot(message);
+                            logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
+                            toimitusPapukaija(message.author.username + ' / #' + message.channel.name + '\n' + message.url);
+                        }
+                    });                
+                }
+            });
+        }
     }
 });
 
@@ -70,6 +72,10 @@ messisBot.on('message', msg => {
     
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
             bot.syncInterval = setInterval(function() { syncHistory(msg); }, 1200000);
+
+        } else if(cmd === "sana") {
+            var strSearch = msg.content.substring(6);
+            wordCount(msg, strSearch);
     
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
@@ -112,6 +118,27 @@ function fetchBulkHistory(msg) {
         }
         
     }).catch(console.error);
+}
+
+/**
+ * Haetaan lista montako kertaa sana toistuu eri kanavilla
+ */
+function wordCount(msg, strSearch) {
+    const embed = new Discord.RichEmbed();
+    var chanList = '';
+    bot.wordCount(strSearch, function(err, rows) {
+        embed.setTitle('Montakokertaa sana \"**' + strSearch + '**\" esiintyy kanavilla.');
+        embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
+        console.log(messisBot);
+        rows.forEach(cols => {
+            chanList += cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+        });
+        embed.setDescription(chanList);
+        msg.channel.send(embed).then(sentMsg => {
+            sentMsg.delete(20000)
+        });
+        msg.delete(2000);
+    });
 }
 
 /**
@@ -168,8 +195,6 @@ function saveMessage(message) {
             request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
             request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
             request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-            // JSON.stringify() kaatuu circular poikkeukseen discord.message-objektin kanssa, util.inspect() tekee json muodon myös
-            request.addParameter('strMessage_json', TYPES.NVarChar, Flatted.stringify(message));
             request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
             con.callProcedure(request);
         }
