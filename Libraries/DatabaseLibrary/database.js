@@ -1,6 +1,6 @@
 var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
-var sqlConfig = require('../../auth/sqlauth.json');
+var sqlConfig = require('../../auth/azureauth.json');
 var TYPES = require('tedious').TYPES;
 
 class DataBase {
