@@ -127,7 +127,7 @@ function fetchBulkHistory(msg) {
  */
 function wordCount(msg, strSearch) {
     const embed = new Discord.RichEmbed();
-    var chanList = '(tämä viesti poistuu 30 sekunnin kuluttua)\n\n';
+    var chanList = '';
     bot.wordCount(strSearch, function(err, rows) {
         embed.setTitle('Montakokertaa sana \"**' + strSearch + '**\" esiintyy kanavilla.');
         embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
