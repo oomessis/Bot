@@ -73,10 +73,9 @@ messisBot.on('message', msg => {
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
             bot.syncInterval = setInterval(function() { syncHistory(msg); }, 1200000);
 
-        } else if(cmd === "sana") {
-            var strSearch = msg.content.substring(6);
-            wordCount(msg, strSearch);
-    
+        } else if(cmd === "koe" && msg.author.username === 'raybarg') {
+            koe(msg.channel.name, 'testi');
+
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
     
@@ -92,7 +91,11 @@ messisBot.on('message', msg => {
     
         } else if(cmd === 'help') {
             helpSpam(msg);
-    
+
+        } else if(cmd === "sana") {
+            var strSearch = msg.content.substring(6);
+            wordCount(msg, strSearch);
+            
         } else {
     
         }
@@ -225,6 +228,8 @@ function testGetChannels() {
             });
             logEvent(count.toString() + ' kanavaa päivitetty tietokantaan.');
             console.log(spam);
+        } else {
+            console.log(guild);
         }
     });
 }
@@ -381,10 +386,14 @@ function saveParrot(message) {
 }
 
 /**
- * Logitusviesti bottien omalle logituskanavalle
+ * Badgeviesti toimitukselle
  * @param {*} msg 
  */
-function toimitusPapukaija(msg) {
-    messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
+function toimitusPapukaija(channelName, msg) {
+    const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
+    if (ch === null) {
+        messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
+    } else {
+        ch.send(msg);
+    }
 }
-
