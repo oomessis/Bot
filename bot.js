@@ -136,11 +136,11 @@ function wordCount(msg, strSearch) {
         });
         embed.setDescription(chanList);
         msg.channel.send(embed).then(sentMsg => {
-            sentMsg.delete(30000);
+            //sentMsg.delete(30000);
         });
         if(!(msg.channel instanceof Discord.DMChannel)) {
             // Komennon poisto ei toimi privachatissa
-            //msg.delete(2000);
+            msg.delete(2000);
         }
     });
 }
