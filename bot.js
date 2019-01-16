@@ -132,7 +132,7 @@ function wordCount(msg, strSearch) {
         embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla:');
         embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
         rows.forEach(cols => {
-            chanList += cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+            chanList += '#' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
         });
         embed.setDescription(chanList);
         msg.channel.send(embed).then(sentMsg => {
