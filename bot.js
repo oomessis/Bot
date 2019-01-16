@@ -272,7 +272,10 @@ function userStat(msg) {
                         { name: msg.author.username, value: totalUser, inline: true}
                     ]
                 }};
-                msg.channel.send(reply);
+                msg.channel.send(reply).then(sentMsg => {
+                    sentMsg.delete(30000);
+                });
+                msg.delete(2000);
             });
         });
     });
@@ -294,6 +297,7 @@ function helpSpam(msg) {
         ]
     }};
     msg.author.send(reply);
+    msg.delete(2000);
 }
 
 /**
