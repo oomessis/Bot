@@ -9,6 +9,8 @@ class BotCommon {
     constructor() {
         this._maxFetch = 100;
         this._lastID = 0;
+        this._lastHour = -1;
+        this._messagesSynced = 0;
         this._DB = new DataBase();
         this._Discord = new DiscordMessage();
     }
@@ -53,6 +55,26 @@ class BotCommon {
         return this._syncInterval;
     }
 
+    /**
+     * Tunti jolloin viimeksi raportoitiin
+     */
+    set lastHour(value) {
+        this._lastHour = value;
+    }
+    get lastHour() {
+        return this._lastHour;
+    }
+
+    /**
+     * Montako viestiä syncattu viimeisen raportoinnin jälkeen
+     */
+    set messagesSynced(value) {
+        this._messagesSynced = value;
+    }
+    get messagesSynced() {
+        return this._messagesSynced;
+    }
+
     getLastID(callback) {
         this._DB.fetchLastID(function(err, lastID) {
             callback(null, lastID);
@@ -83,5 +105,13 @@ class BotCommon {
         });
     }
 
+    /**
+     * Botin oma console.log()
+     * @param {*} msg 
+     */
+    log(msg) {
+        var d = new Date();
+        console.log(d.toString() + ': ' + msg);
+    }
 }
 module.exports = BotCommon;

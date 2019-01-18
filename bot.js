@@ -23,10 +23,13 @@ logger.level = 'debug';
 
 var messisBot = new Discord.Client();
 messisBot.on('ready', () => {
-
+    if (auth.dev === 0) {
+        // Automaattinen viestien synkronointi
+        bot.syncInterval = setInterval(function() { syncHistory(); }, 10000);
+    }
 });
 
-messisBot.on('error', () => console.log('errored'));
+messisBot.on('error', () => bot.log('errored'));
 messisBot.login(auth.token);
 
 // Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
@@ -48,7 +51,7 @@ messisBot.on('raw', packet => {
                             logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
                             toimitusPapukaija(channel.name, message.author.username + ' / #' + message.channel.name + '\n' + message.url);
                         }
-                    });                
+                    });
                 }
             });
         }
@@ -71,7 +74,7 @@ messisBot.on('message', msg => {
             bot.bulkInterval = setInterval(function() { fetchBulkHistory(msg); }, 10000);
     
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
-            bot.syncInterval = setInterval(function() { syncHistory(msg); }, 1200000);
+            bot.syncInterval = setInterval(function() { syncHistory(); }, 10000);
 
         } else if(cmd === "koe" && msg.author.username === 'raybarg') {
             koe(msg.channel.name, 'testi');
@@ -94,7 +97,9 @@ messisBot.on('message', msg => {
 
         } else if(cmd === "sana") {
             var strSearch = msg.content.substring(6);
-            wordCount(msg, strSearch);
+            if (!this.countingWords) {
+                wordCount(msg, strSearch);
+            }
             
         } else {
     
@@ -109,7 +114,7 @@ messisBot.on('message', msg => {
 function fetchBulkHistory(msg) {
     const targetChannel = messisBot.channels.get(auth.yleinen);
     targetChannel.fetchMessages({ limit: bot.maxFetch, before: bot.lastID }).then(messages => {
-        console.log(messages.size.toString());
+        bot.log(messages.size.toString());
         var msgArr = messages.array();
         for(var i = 0; i < msgArr.length; i++ ) {
             saveMessage(msgArr[i]);
@@ -129,46 +134,65 @@ function fetchBulkHistory(msg) {
  * @param {*} strSearch 
  */
 function wordCount(msg, strSearch) {
-    const embed = new Discord.RichEmbed();
-    var chanList = '';
     bot.wordCount(strSearch, function(err, rows) {
-        embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla:');
-        embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
-        rows.forEach(cols => {
-            chanList += '#' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
-        });
-        embed.setDescription(chanList);
-        msg.channel.send(embed).then(sentMsg => {
-            //sentMsg.delete(30000);
-        });
-        if(!(msg.channel instanceof Discord.DMChannel)) {
-            // Komennon poisto ei toimi privachatissa
-            msg.delete(2000);
+        const embed = new Discord.RichEmbed();
+        var chanList = '';
+
+        if (err) {
+            console.log(err);
+        } else {
+            if (rows) {
+                embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla:');
+                embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
+                rows.forEach(cols => {
+                    chanList += '#' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+                });
+                embed.setDescription(chanList);
+                msg.channel.send(embed).then(sentMsg => {
+                    //sentMsg.delete(30000);
+                });
+                if(!(msg.channel instanceof Discord.DMChannel)) {
+                    // Komennon poisto ei toimi privachatissa
+                    msg.delete(2000);
+                }
+            } else {
+                
+            }
         }
     });
 }
 
 /**
  * Intervaalikutsu uusien viestien synccaukseen
- * @param {*} msg 
  */
-function syncHistory(msg) {
+function syncHistory() {
     bot.getLastID(function(err, lastMsgID) {
-        syncNewMessages(msg, lastMsgID);
+        if (err) {
+            console.log(err);
+        } else {
+            syncNewMessages(lastMsgID);
+        }
     });
 }
 
 /**
  * Hakee lastMsgID tokenin jälkeen tulleet uudet viestit
- * @param {*} msg Discordin viestiolio, tästä tiedetään minne kanavalle annetaan vastaus
  * @param {*} lastMsgID Tokeni jonka jälkeen tulleita viestejä haetaan
  */
-function syncNewMessages(msg, lastMsgID) {
+function syncNewMessages(lastMsgID) {
     const targetChannel = messisBot.channels.get(auth.yleinen);
     targetChannel.fetchMessages({ limit: bot.maxFetch, after: lastMsgID }).then(messages => {
-        console.log(messages.size.toString() + " / " + bot.maxFetch.toString());
+        bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
         if (messages.size > 0) {
-            logEvent("Syncronoitu viestejä: " + messages.size.toString() + " / " + bot.maxFetch.toString());
+            bot.messagesSynced += messages.size;
+            var d = new Date();
+            var thisHour = d.getHours();
+            if (thisHour !== bot.lastHour) {
+                logEvent("Syncronoitu viestejä kuluneen tunnin aikana: " + bot.messagesSynced.toString());
+
+                bot.lastHour = thisHour;
+                bot.messagesSynced = 0;
+            }
         }
         var msgArr = messages.array();
         for(var i = 0; i < msgArr.length; i++ ) {
@@ -397,3 +421,4 @@ function toimitusPapukaija(channelName, msg) {
         ch.send(msg);
     }
 }
+
