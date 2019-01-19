@@ -7,6 +7,9 @@ IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[discord_messages
 BEGIN
 	IF ISNULL(columnproperty( object_id(N'[discord_messages]'),'message_text','precision'),0)=0
 		alter table [discord_messages] add [message_text] NVARCHAR(2000) null
+
+	IF ISNULL(columnproperty( object_id(N'[discord_messages]'),'user_id','precision'),0)=0
+		alter table [discord_messages] add [user_id] NVARCHAR(50) null
 END
 ELSE
 BEGIN
@@ -18,7 +21,8 @@ BEGIN
 		[message_id] nvarchar(50) NOT NULL,					-- message ID
 		[message_date] datetime NOT NULL,					-- Message date
 		[person_name] nvarchar(50) NOT NULL,				-- Message author name
-		[message_text] nvarchar(2000) NULL					-- Message text
+		[message_text] nvarchar(2000) NULL,					-- Message text
+		[user_id] nvarchar(50)								-- user ID
 	) ON [primary]
 END
 GO

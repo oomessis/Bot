@@ -238,6 +238,7 @@ function saveMessage(message) {
             request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
             request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
             request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
+            request.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
             con.callProcedure(request);
         }
     });

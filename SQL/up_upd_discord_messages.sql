@@ -14,7 +14,8 @@ CREATE PROCEDURE [dbo].[up_upd_discord_messages]
 	@iMessage_id nvarchar(50),
 	@dtMessage_date datetime,
 	@strPerson_name nvarchar(50),
-	@strMessage_text nvarchar(2000)
+	@strMessage_text nvarchar(2000),
+	@strUser_id nvarchar(50)
 as
 
 	UPDATE discord_messages SET
@@ -23,7 +24,8 @@ as
 		message_id=@iMessage_id,
 		message_date=@dtMessage_date,
 		person_name=@strPerson_name,
-		message_text=@strMessage_text
+		message_text=@strMessage_text,
+		[user_id]=@strUser_id
 	where message_id = @iMessage_id
 
 	IF @@rowcount = 0 BEGIN
@@ -33,7 +35,8 @@ as
 			message_id,
 			message_date,
 			person_name,
-			message_text
+			message_text,
+			[user_id]
 			)
 		VALUES(
 			@iServer_id,
@@ -41,7 +44,8 @@ as
 			@iMessage_id,
 			@dtMessage_date,
 			@strPerson_name,
-			@strMessage_text
+			@strMessage_text,
+			@strUser_id
 			)
 
 		-- Haetaan luotu oma identity
