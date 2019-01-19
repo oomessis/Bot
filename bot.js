@@ -105,6 +105,17 @@ messisBot.on('message', msg => {
     
         }
     }
+
+    if (!bPrivate && auth.dev === 0) {
+        // Reaaliaikainen syncronointi
+        if (msg.channel.id !== '532946068967784508' && msg.channel.id !== '524337438462836779' && msg.channel.id !== '502911862606659586') {
+            // hoidetaan yleinen vielä intervalilla
+            if (msg.channel.id !== '446419809668694019') {
+                saveMessage(msg);
+                bot.messagesSynced++;
+            }
+        }
+    }
 });
 
 /**
