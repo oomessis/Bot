@@ -26,3 +26,7 @@ BEGIN
 	) ON [primary]
 END
 GO
+CREATE NONCLUSTERED INDEX [index1]
+ON [dbo].[discord_messages] ([user_id])
+INCLUDE ([channel_id])
+GO

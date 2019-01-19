@@ -71,7 +71,7 @@ messisBot.on('message', msg => {
 
     if (cmd.length > 0) {
         if(cmd === 'm' && msg.author.username === 'raybarg') {
-            bot.bulkInterval = setInterval(function() { fetchBulkHistory(msg); }, 10000);
+            bot.bulkInterval = setInterval(function() { fetchBulkHistory(msg); }, 20000);
     
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
             bot.syncInterval = setInterval(function() { syncHistory(); }, 10000);
