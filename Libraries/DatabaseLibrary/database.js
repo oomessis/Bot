@@ -70,17 +70,17 @@ class DataBase {
 
     /**
      * Hakee tietokannasta käyttäjänimen viestien lukumäärän
-     * @param {*} userName 
+     * @param {*} userID 
      * @param {*} callback 
      */
-    fetchUserMessageCount(userName, callback) {
+    fetchUserMessageCount(userID, callback) {
         var con = new Connection(sqlConfig);
         var msgCount = 0;
         con.on('connect', function(err) {
             if (err) {
                 return callback(err);
             } else {
-                var sql = 'SELECT COUNT(*) AS messageCount FROM discord_messages WHERE person_name = @userName';
+                var sql = 'SELECT COUNT(*) AS messageCount FROM discord_messages WHERE user_id = @userID';
                 this._request = new Request(sql, function(err, rowCount) {
                     if (err) {
                         return callback(err);
@@ -88,7 +88,7 @@ class DataBase {
                     con.close();
                     callback(null, msgCount);
                 });
-                this._request.addParameter('userName', TYPES.VarChar, userName);
+                this._request.addParameter('userID', TYPES.VarChar, userID);
                 this._request.on('row', function(columns) {
                     columns.forEach(function(column) {
                         if (column.value !== null) {
@@ -155,6 +155,31 @@ class DataBase {
                     retval.push(columns);
                 });
                 con.callProcedure(this._request);
+            }
+        });
+    }
+
+    /**
+     * Haetaan kanavat kannasta listaan
+     */
+    getChannels(callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select * from discord_channels", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.execSql(this._request);
             }
         });
     }

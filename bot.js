@@ -1,4 +1,4 @@
-var discordMessage = require('./Libraries/DiscordLibrary/DiscordMessage.js');
+var discordMessage = require('./Libraries/DatabaseLibrary/DiscordMessage.js');
 var util = require('util');
 var fs = require('fs');
 var Flatted = require('flatted');
@@ -10,6 +10,7 @@ var Request = require('tedious').Request;
 var TYPES = require('tedious').TYPES;
 var sqlAuth = require('./auth/azureauth.json');
 var BotCommon = require('./Libraries/BotLibrary/botcommon.js');
+var http = require('http');
 
 var bot = new BotCommon();
 
@@ -26,6 +27,9 @@ messisBot.on('ready', () => {
     if (auth.dev === 0) {
         // Automaattinen viestien synkronointi
         bot.syncInterval = setInterval(function() { syncHistory(); }, 10000);
+        messisBot.user.setActivity('Komennot: !help');
+    } else {
+        messisBot.user.setActivity('Its Time For Kablew!');
     }
 });
 
@@ -76,8 +80,8 @@ messisBot.on('message', msg => {
         } else if(cmd === "s" && msg.author.username === 'raybarg') {
             bot.syncInterval = setInterval(function() { syncHistory(); }, 10000);
 
-        } else if(cmd === "koe" && msg.author.username === 'raybarg') {
-            koe(msg.channel.name, 'testi');
+        } else if(cmd === "masssync" && msg.author.username === 'raybarg') {
+            massSync();
 
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
@@ -153,11 +157,22 @@ function wordCount(msg, strSearch) {
             console.log(err);
         } else {
             if (rows) {
-                embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla:');
+                var total = 0;
+                var listed = 0;
+                embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla top 10:');
                 embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
+                rows.sort(compare);
                 rows.forEach(cols => {
-                    chanList += '#' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+                    if (cols[0].value > 0) {
+                        listed++;
+                        if (listed <= 10) {
+                            chanList += listed.toString() + '. #' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+                        }
+                        total += cols[0].value;
+                    }
                 });
+                chanList += '---\n';
+                chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '**\n';
                 embed.setDescription(chanList);
                 msg.channel.send(embed).then(sentMsg => {
                     //sentMsg.delete(30000);
@@ -171,6 +186,18 @@ function wordCount(msg, strSearch) {
             }
         }
     });
+}
+
+function compare(a, b) {
+    var ay = a[0].value;
+    var by = b[0].value;
+    if (ay < by) {
+        return 1;
+    }
+    if (ay > by) {
+        return -1;
+    }
+    return 0;
 }
 
 /**
@@ -199,7 +226,7 @@ function syncNewMessages(lastMsgID) {
             var d = new Date();
             var thisHour = d.getHours();
             if (thisHour !== bot.lastHour) {
-                logEvent("Syncronoitu viestejä kuluneen tunnin aikana: " + bot.messagesSynced.toString());
+                logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
 
                 bot.lastHour = thisHour;
                 bot.messagesSynced = 0;
@@ -297,20 +324,20 @@ function userTest(msg, u) {
  * @param {*} msg 
  */
 function userStat(msg) {
-    logEvent("Statistiikkaa käyttäjälle: " + msg.author.username);
+    logEvent("Statistiikkaa käyttäjälle: " + msg.member.displayName);
     bot.getLastID(function(err, lastMsgID) {
-        syncNewMessages(msg, lastMsgID);
+        syncNewMessages(lastMsgID);
         bot.messageCount(function(err, total) {
             if (err) {
 
             }
-            bot.userMessageCount(msg.author.username, function(err, totalUser) {
+            bot.userMessageCount(msg.author.id, function(err, totalUser) {
                 var reply = {embed: {
                     color: 3447003,
                     title: "Viestien statistiikkaa",
                     fields: [
                         { name: "#yleinen", value: total, inline: true},
-                        { name: msg.author.username, value: totalUser, inline: true}
+                        { name: msg.member.displayName, value: totalUser, inline: true}
                     ]
                 }};
                 msg.channel.send(reply).then(sentMsg => {
@@ -434,3 +461,61 @@ function toimitusPapukaija(channelName, msg) {
     }
 }
 
+/**
+ * Kanavien historioiden haku
+ */
+function massSync() {
+    console.log(messisBot.user.id);
+    bot.getChannels(function(err, channels) {
+        if (err) {
+            console.log(err);
+        } else {
+            if (channels) {
+                channels.forEach(cols => {
+                    bot.channels.push(cols[2].value);
+                });
+                console.log('Kanavia ' + bot.channels.length);
+                bot.bulkIndex = 0;
+                bot.bulkInterval = setInterval(function() { fetchBulkHistoryAllChannels(); }, 20000);
+            }
+        }
+    });
+}
+
+/**
+ * Hakee viestihistorian kanavilta
+ */
+function fetchBulkHistoryAllChannels() {
+    if (bot.channels[bot.bulkIndex] !== auth.yleinen) {
+        const targetChannel = messisBot.channels.get(bot.channels[bot.bulkIndex]);
+        if (targetChannel) {
+            const can_read_history = targetChannel.permissionsFor(messisBot.user.id).has("READ_MESSAGE_HISTORY", false);
+            const can_view_channel = targetChannel.permissionsFor(messisBot.user.id).has("VIEW_CHANNEL", false);
+            if (can_read_history && can_view_channel) {
+                targetChannel.fetchMessages({ limit: bot.maxFetch, before: bot.lastID }).then(messages => {
+                    bot.log(bot.channels[bot.bulkIndex] + ' -> ' + messages.size.toString());
+                    var msgArr = messages.array();
+                    for(var i = 0; i < msgArr.length; i++ ) {
+                        saveMessage(msgArr[i]);
+                    }
+                    if(messages.size < bot.maxFetch) {
+                        bot.bulkIndex++;
+                        bot.lastID = '';
+                    } else {
+                        bot.lastID = msgArr[msgArr.length-1].id;
+                    }
+                    
+                }).catch(console.error);
+            } else {
+                bot.log(bot.channels[bot.bulkIndex] + ' skipattu koska ei oikeuksia.');
+                bot.bulkIndex++;
+            }
+        } else {
+            bot.log(bot.channels[bot.bulkIndex] + ' skipattu koska kanavan haku ei palauttanut mitään.');
+            bot.bulkIndex++;
+        }
+        if (bot.bulkIndex >= bot.channels.length) {
+            clearInterval(bot.bulkInterval);
+        }
+    }
+}

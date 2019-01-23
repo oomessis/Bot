@@ -1,6 +1,6 @@
 "use strict";
 var DataBase = require('../DatabaseLibrary/database.js');
-var DiscordMessage = require('../DiscordLibrary/DiscordMessage.js');
+var DiscordMessage = require('../DatabaseLibrary/DiscordMessage.js');
 
 /**
  * Luokka botin yleisille muuttujille niin saadaan ne pois global scopesta
@@ -13,6 +13,9 @@ class BotCommon {
         this._messagesSynced = 0;
         this._DB = new DataBase();
         this._Discord = new DiscordMessage();
+
+        this.channels = [];
+        this.bulkIndex = 0;
     }
 
     /**
@@ -87,8 +90,8 @@ class BotCommon {
         });
     }
 
-    userMessageCount(userName, callback) {
-        this._DB.fetchUserMessageCount(userName, function(err, msgCount) {
+    userMessageCount(userID, callback) {
+        this._DB.fetchUserMessageCount(userID, function(err, msgCount) {
             callback(null, msgCount);
         });
     }
@@ -102,6 +105,12 @@ class BotCommon {
     wordCount(strSearch, callback) {
         this._DB.wordCount(strSearch, function(err, rows) {
             callback(null, rows);
+        });
+    }
+
+    getChannels(callback) {
+        this._DB.getChannels(function(err, channels) {
+            callback(null, channels);
         });
     }
 
