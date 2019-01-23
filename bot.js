@@ -327,7 +327,7 @@ function userStat(msg) {
     logEvent("Statistiikkaa käyttäjälle: " + msg.member.displayName);
     bot.getLastID(function(err, lastMsgID) {
         syncNewMessages(lastMsgID);
-        bot.messageCount(function(err, total) {
+        bot.messageCount(function(err, totalAllChannels) {
             if (err) {
                 console.log(err);
             } else {
@@ -340,6 +340,7 @@ function userStat(msg) {
                             var total = 0;
                             var listed = 0;
                             var chanList = '';
+                            var percent = 0;
                             embed.setTitle('Käyttäjän `' + msg.author.username + '` viestien statistiikkaa top 10:');
                             embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
                             totalUserList.sort(compare);
@@ -352,8 +353,9 @@ function userStat(msg) {
                                     total += cols[0].value;
                                 }
                             });
+                            percent = (total / totalAllChannels) * 100;
                             chanList += '---\n';
-                            chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '**\n';
+                            chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '** / **' + totalAllChannels.toString() + '**. Olet kirjoittanut ' + parseFloat(percent).toFixed(1) + '% Messiksen viesteistä.';
                             embed.setDescription(chanList);
                             msg.channel.send(embed).then(sentMsg => {
                                 //sentMsg.delete(30000);
