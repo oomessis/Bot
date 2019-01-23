@@ -329,25 +329,43 @@ function userStat(msg) {
         syncNewMessages(lastMsgID);
         bot.messageCount(function(err, total) {
             if (err) {
-
-            }
-            bot.userMessageCount(msg.author.id, function(err, totalUser) {
-                var reply = {embed: {
-                    color: 3447003,
-                    title: "Viestien statistiikkaa",
-                    fields: [
-                        { name: "#yleinen", value: total, inline: true},
-                        { name: msg.member.displayName, value: totalUser, inline: true}
-                    ]
-                }};
-                msg.channel.send(reply).then(sentMsg => {
-                    //sentMsg.delete(30000);
+                console.log(err);
+            } else {
+                bot.userMessageCount(msg.author.id, function(err, totalUserList) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        if (totalUserList) {
+                            const embed = new Discord.RichEmbed();
+                            var total = 0;
+                            var listed = 0;
+                            var chanList = '';
+                            embed.setTitle('Käyttäjän `' + msg.author.username + '` viestien statistiikkaa top 10:');
+                            embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
+                            totalUserList.sort(compare);
+                            totalUserList.forEach(cols => {
+                                if (cols[0].value > 0) {
+                                    listed++;
+                                    if (listed <= 10) {
+                                        chanList += listed.toString() + '. #' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
+                                    }
+                                    total += cols[0].value;
+                                }
+                            });
+                            chanList += '---\n';
+                            chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '**\n';
+                            embed.setDescription(chanList);
+                            msg.channel.send(embed).then(sentMsg => {
+                                //sentMsg.delete(30000);
+                            });
+                            if(!(msg.channel instanceof Discord.DMChannel)) {
+                                // Komennon poisto ei toimi privachatissa
+                                msg.delete(2000);
+                            }
+                        }
+                    }
                 });
-                if(!(msg.channel instanceof Discord.DMChannel)) {
-                    // Komennon poisto ei toimi privachatissa
-                    msg.delete(2000);
-                }
-            });
+            }
         });
     });
 }

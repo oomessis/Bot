@@ -74,27 +74,23 @@ class DataBase {
      * @param {*} callback 
      */
     fetchUserMessageCount(userID, callback) {
+        var retval = [];
         var con = new Connection(sqlConfig);
-        var msgCount = 0;
         con.on('connect', function(err) {
             if (err) {
                 return callback(err);
             } else {
-                var sql = 'SELECT COUNT(*) AS messageCount FROM discord_messages WHERE user_id = @userID';
-                this._request = new Request(sql, function(err, rowCount) {
+                var sql = 'select count(*) cnt, channel_name from discord_messages dm inner join discord_channels dc on dm.channel_id = dc.channel_id where [user_id] = @userID group by dc.channel_name order by cnt desc';
+                this._request = new Request(sql, function(err, rowCount, rows) {
                     if (err) {
                         return callback(err);
                     }
                     con.close();
-                    callback(null, msgCount);
+                    callback(null, retval);
                 });
                 this._request.addParameter('userID', TYPES.VarChar, userID);
                 this._request.on('row', function(columns) {
-                    columns.forEach(function(column) {
-                        if (column.value !== null) {
-                            msgCount = column.value;
-                        }
-                    });
+                    retval.push(columns);
                 });
                 con.execSql(this._request);
             }

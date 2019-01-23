@@ -91,8 +91,8 @@ class BotCommon {
     }
 
     userMessageCount(userID, callback) {
-        this._DB.fetchUserMessageCount(userID, function(err, msgCount) {
-            callback(null, msgCount);
+        this._DB.fetchUserMessageCount(userID, function(err, msgCountList) {
+            callback(null, msgCountList);
         });
     }
 
