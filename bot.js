@@ -53,7 +53,7 @@ messisBot.on('raw', packet => {
                     bot.parroExists(message.author.id, message.id, function(err, parrotID) {
                         if(parrotID === -1) {
                             saveParrot(message);
-                            logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n' + message.url);
+                            logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n<' + message.url + '>');
                             toimitusPapukaija(channel.name, message.author.username + ' / #' + message.channel.name + '\n' + message.url);
                         }
                     });
