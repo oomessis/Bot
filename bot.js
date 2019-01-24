@@ -55,7 +55,7 @@ messisBot.on('raw', packet => {
                             var announcement = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
                             saveParrot(message);
                             logEvent(announcement);
-                            toimitusPapukaija(channel.name, announcement);
+                            toimitusPapukaija(channel.name, announcement, message);
                         }
                     });
                 }
@@ -481,18 +481,20 @@ function saveParrot(message) {
 
 /**
  * Badgeviesti toimitukselle & yhteisölle
- * @param {*} msg 
+ * @param {*} channelName 
+ * @param {*} announcement 
+ * @param {*} message 
  */
-function toimitusPapukaija(channelName, msg) {
+function toimitusPapukaija(channelName, announcement, message) {
     const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
     if (ch === null) {
-        messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
+        messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(announcement));
     } else {
-        ch.send(msg);
+        ch.send(announcement);
     }
     const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
     if (chYleinen) {
-        chYleinen.send(msg);
+        chYleinen.send(announcement + '\n```' + message.content + '```');
     }
 }
 
