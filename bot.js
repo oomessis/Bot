@@ -88,6 +88,13 @@ messisBot.on('message', msg => {
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
     
+        } else if(cmd === "badgescores" && msg.author.username === 'raybarg') {
+            badgeScoreList(msg);
+    
+        } else if(cmd === "badgelist" && msg.author.username === 'raybarg') {
+            var userName = msg.content.substring(11);
+            badgeList(msg, userName);
+    
         } else if(cmd === 'ajarooli' && msg.author.username === 'raybarg') {
             giveLotsofPermissions();
     
@@ -120,10 +127,6 @@ messisBot.on('message', msg => {
                 saveMessage(msg);
                 bot.messagesSynced++;
             }
-        }
-    } else {
-        if (!bPrivate) {
-            saveMessageREST(msg);
         }
     }
 });
@@ -393,13 +396,15 @@ function helpSpam(msg) {
         color: 3447003,
         title: "Messis Bot Komentolistaus",
         fields: [
-            { name: "!stat", value: "Oma käyttäjästatistiikkasi joka lähetetään privaattiviestinä.", inline: true},
-            { name: "!sana esimerkki", value: "Kanavakohtaine tilasto miten paljon sanaa 'esimerkkiä on käytetty.", inline: true},
-            { name: "!avatar käyttäjänimi", value: "Hakee annetulle käyttäjänimelle avatar-linkin ja lähettää sen privaattiviestinä. Käyttäjänimi pitää olla discord-tilin oikea käyttäjänimi (ei näkyvä nimi) ja sen on oltava case-sensitiivinen.\nEsim. !avatar raybarg\nKomento ei kerro mitään jos käyttäjän nimellä ei löytynyt profiilia.", inline: true}
+            { name: "!stat", value: "Oma käyttäjästatistiikkasi joka lähetetään privaattiviestinä.", inline: false},
+            { name: "!sana <esimerkki>", value: "Kanavakohtaine tilasto miten paljon sanaa 'esimerkki' on käytetty.", inline: false},
+            { name: "!badgescores", value: "Lista ansaituista badgeistä per käyttäjä.", inline: false},
+            { name: "!badgelist <nimi>", value: "<nimi> käyttäjän badget, pvm, linkki ja teksti.", inline: false},
+            { name: "!avatar <käyttäjänimi>", value: "Hakee annetulle käyttäjänimelle avatar-linkin ja lähettää sen privaattiviestinä. Käyttäjänimi pitää olla discord-tilin oikea käyttäjänimi (ei näkyvä nimi) ja sen on oltava case-sensitiivinen.\nEsim. !avatar raybarg\nKomento ei kerro mitään jos käyttäjän nimellä ei löytynyt profiilia.", inline: false}
         ]
     }};
     msg.author.send(reply);
-    msg.delete(2000);
+    if(!(msg.channel instanceof Discord.DMChannel)) msg.delete(2000);
 }
 
 /**
@@ -474,6 +479,7 @@ function saveParrot(message) {
             request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
             request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
             request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0,199));
+            request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
             con.callProcedure(request);
         }
     });
@@ -567,4 +573,75 @@ function getDisplayName(msg) {
     } else {
         return msg.member.displayName;
     }
+}
+
+/**
+ * Haetaan badgejen ansaintalista
+ * @param {*} msg 
+ * @param {*} strSearch 
+ */
+function badgeScoreList(msg) {
+    bot.getPABadgeScoreList(function(err, rows) {
+        if (err) {
+            console.log(err);
+        } else {
+            if (rows) {
+                var listedPaging = 0;
+                var scoreList = '```Montako kertaa puheenaihebadgeja ansaittu:\n';
+                rows.forEach(cols => {
+                    if (cols[0].value > 0) {
+                        listedPaging++;
+                        scoreList += cols[0].value.toString() + ' \t\t' + cols[1].value + '\n';
+                        if (listedPaging >= 20) {
+                            scoreList += '```';
+                            msg.channel.send(scoreList);
+                            listedPaging = 0;
+                            scoreList = '```';
+                        }
+                    }
+                });
+                scoreList += '```';
+                msg.channel.send(scoreList);
+                if(!(msg.channel instanceof Discord.DMChannel)) {
+                    // Komennon poisto ei toimi privachatissa
+                    msg.delete(2000);
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Haetaan badgejen ansaintalista
+ * @param {*} msg 
+ * @param {*} strSearch 
+ */
+function badgeList(msg, userName) {
+    bot.getPAUserBadges(userName, function(err, rows) {
+        if (err) {
+            console.log(err);
+        } else {
+            if (rows) {
+                var listedPaging = 0;
+                var scoreList = 'Badgelistaus käyttäjänimihaulla: `' + userName + '`:\n\n';
+                rows.forEach(cols => {
+                    if (cols[0].value > 0) {
+                        listedPaging++;
+                        scoreList += '`' + cols[0].value.toString() + '`: ' + cols[2].value + '\n' + '' + cols[1].value + '\n\n';
+                        if (listedPaging >= 20) {
+                            scoreList += '';
+                            msg.channel.send(scoreList);
+                            listedPaging = 0;
+                            scoreList = '';
+                        }
+                    }
+                });
+                msg.channel.send(scoreList);
+                if(!(msg.channel instanceof Discord.DMChannel)) {
+                    // Komennon poisto ei toimi privachatissa
+                    msg.delete(2000);
+                }
+            }
+        }
+    });
 }

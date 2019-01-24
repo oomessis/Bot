@@ -114,6 +114,17 @@ class BotCommon {
         });
     }
 
+    getPABadgeScoreList(callback) {
+        this._DB.getPABadgeScoreList(function(err, scoreList) {
+            callback(null, scoreList);
+        });
+    }
+
+    getPAUserBadges(strUserName, callback) {
+        this._DB.getPAUserBadges(strUserName, function(err, badges) {
+            callback(null, badges);
+        });
+    }
     /**
      * Botin oma console.log()
      * @param {*} msg 

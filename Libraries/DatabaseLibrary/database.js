@@ -180,5 +180,50 @@ class DataBase {
         });
     }
 
+    getPABadgeScoreList(callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select count(*) cnt, max(person_name) person_name from parrots group by [user_id] order by cnt desc", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.execSql(this._request);
+            }
+        });
+    }
+
+    getPAUserBadges(userName, callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select message_date, message_text, message_url from parrots where person_name = @strUserName order by message_date", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
+                this._request.addParameter('strUserName', TYPES.NVarChar, userName);
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.execSql(this._request);
+            }
+        });
+    }
+
 }
 module.exports = DataBase;
