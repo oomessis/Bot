@@ -14,7 +14,8 @@ CREATE PROCEDURE [dbo].[up_upd_parrot]
 	@dtMessage_date datetime,
 	@strPerson_name nvarchar(50),
 	@strMessage_text nvarchar(2000),
-	@strMessage_url nvarchar(200)
+	@strMessage_url nvarchar(200),
+	@iChannel_id nvarchar(50)
 as
 
 	UPDATE parrots SET
@@ -23,7 +24,8 @@ as
 		message_date=@dtMessage_date,
 		person_name=@strPerson_name,
 		message_text=@strMessage_text,
-		message_url=@strMessage_url
+		message_url=@strMessage_url,
+		channel_id=@iChannel_id
 	where [user_id] = @iUser_id and message_id = @iMessage_id
 
 	IF @@rowcount = 0 BEGIN
@@ -33,7 +35,8 @@ as
 			message_date,
 			person_name,
 			message_text,
-			message_url
+			message_url,
+			channel_id
 			)
 		VALUES(
 			@iUser_id,
@@ -41,7 +44,8 @@ as
 			@dtMessage_date,
 			@strPerson_name,
 			@strMessage_text,
-			@strMessage_url
+			@strMessage_url,
+			@iChannel_id
 			)
 
 		-- Haetaan luotu oma identity
