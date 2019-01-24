@@ -11,6 +11,7 @@ var TYPES = require('tedious').TYPES;
 var sqlAuth = require('./auth/azureauth.json');
 var BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 var http = require('http');
+var request = require('request');
 
 var bot = new BotCommon();
 
@@ -119,6 +120,10 @@ messisBot.on('message', msg => {
                 bot.messagesSynced++;
             }
         }
+    } else {
+        if (!bPrivate) {
+            saveMessageREST(msg);
+        }
     }
 });
 
@@ -188,6 +193,11 @@ function wordCount(msg, strSearch) {
     });
 }
 
+/**
+ * Listan sorttaus
+ * @param {*} a 
+ * @param {*} b 
+ */
 function compare(a, b) {
     var ay = a[0].value;
     var by = b[0].value;
@@ -469,7 +479,7 @@ function saveParrot(message) {
 }
 
 /**
- * Badgeviesti toimitukselle
+ * Badgeviesti toimitukselle & yhteisölle
  * @param {*} msg 
  */
 function toimitusPapukaija(channelName, msg) {
@@ -478,6 +488,11 @@ function toimitusPapukaija(channelName, msg) {
         messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(msg));
     } else {
         ch.send(msg);
+    }
+    const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
+    if (chYleinen) {
+        const announcement = 'Puheenaihebadgen ansaitsi ' + msg + '-kanavalla:';
+        chYleinen.send(announcement);
     }
 }
 
@@ -540,6 +555,10 @@ function fetchBulkHistoryAllChannels() {
     }
 }
 
+/**
+ * Tulkitaan msg-objektista userin nimi/nicki
+ * @param {*} msg 
+ */
 function getDisplayName(msg) {
     if(msg.channel instanceof Discord.DMChannel) {
         return msg.author.username;
