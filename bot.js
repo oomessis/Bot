@@ -52,9 +52,10 @@ messisBot.on('raw', packet => {
                 if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
                     bot.parroExists(message.author.id, message.id, function(err, parrotID) {
                         if(parrotID === -1) {
+                            var announcement = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
                             saveParrot(message);
-                            logEvent(message.author.username + ' kirjoittama viesti ansaitsi papukaijamerkin ja tapahtuma arkistoitiin tietokantaan.\n<' + message.url + '>');
-                            toimitusPapukaija(channel.name, message.author.username + ' / #' + message.channel.name + '\n<' + message.url + '>');
+                            logEvent(announcement);
+                            toimitusPapukaija(channel.name, announcement);
                         }
                     });
                 }
@@ -489,10 +490,9 @@ function toimitusPapukaija(channelName, msg) {
     } else {
         ch.send(msg);
     }
-    const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
+    const chYleinen = messisBot.channels.find(ch => ch.id = auth.automaatio);
     if (chYleinen) {
-        const announcement = 'Puheenaihebadgen ansaitsi ' + msg + '-kanavalla:';
-        chYleinen.send(announcement);
+        chYleinen.send(msg);
     }
 }
 
