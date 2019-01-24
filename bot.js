@@ -490,7 +490,7 @@ function toimitusPapukaija(channelName, msg) {
     } else {
         ch.send(msg);
     }
-    const chYleinen = messisBot.channels.find(ch => ch.id = auth.automaatio);
+    const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
     if (chYleinen) {
         chYleinen.send(msg);
     }
