@@ -159,7 +159,7 @@ function wordCount(msg, strSearch) {
             if (rows) {
                 var total = 0;
                 var listed = 0;
-                embed.setTitle(msg.author.username + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla top 10:');
+                embed.setTitle(getDisplayName(msg) + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla top 10:');
                 embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
                 rows.sort(compare);
                 rows.forEach(cols => {
@@ -324,7 +324,7 @@ function userTest(msg, u) {
  * @param {*} msg 
  */
 function userStat(msg) {
-    logEvent("Statistiikkaa käyttäjälle: " + msg.member.displayName);
+    logEvent("Statistiikkaa käyttäjälle: " + getDisplayName(msg));
     bot.getLastID(function(err, lastMsgID) {
         syncNewMessages(lastMsgID);
         bot.messageCount(function(err, totalAllChannels) {
@@ -341,7 +341,7 @@ function userStat(msg) {
                             var listed = 0;
                             var chanList = '';
                             var percent = 0;
-                            embed.setTitle('Käyttäjän `' + msg.author.username + '` viestien statistiikkaa top 10:');
+                            embed.setTitle('Käyttäjän `' + getDisplayName(msg) + '` viestien statistiikkaa top 10:');
                             embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
                             totalUserList.sort(compare);
                             totalUserList.forEach(cols => {
@@ -537,5 +537,13 @@ function fetchBulkHistoryAllChannels() {
         if (bot.bulkIndex >= bot.channels.length) {
             clearInterval(bot.bulkInterval);
         }
+    }
+}
+
+function getDisplayName(msg) {
+    if(msg.channel instanceof Discord.DMChannel) {
+        return msg.author.username;
+    } else {
+        return msg.member.displayName;
     }
 }
