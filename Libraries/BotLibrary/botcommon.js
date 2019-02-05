@@ -125,6 +125,13 @@ class BotCommon {
             callback(null, badges);
         });
     }
+
+    getChannelBadges(strChannelName, callback) {
+        this._DB.getChannelBadges(strChannelName, function(err, badges) {
+            callback(null, badges);
+        });
+    }
+
     /**
      * Botin oma console.log()
      * @param {*} msg 

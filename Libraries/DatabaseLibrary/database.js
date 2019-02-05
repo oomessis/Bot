@@ -225,5 +225,28 @@ class DataBase {
         });
     }
 
+    getChannelBadges(channelName, callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select message_date, message_text, message_url from parrots inner join discord_channels dc on parrots.channel_id = dc.channel_id where dc.channel_name = @strChannelName order by message_date", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
+                this._request.addParameter('strChannelName', TYPES.NVarChar, channelName);
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.execSql(this._request);
+            }
+        });
+    }
+
 }
 module.exports = DataBase;

@@ -41,26 +41,37 @@ messisBot.login(auth.token);
 // Suoritetaan vain joso botti ei ole development versio
 messisBot.on('raw', packet => {
     if (auth.dev === 0) {
-        const guild = messisBot.guilds.get(auth.messis);
-        if (!['MESSAGE_REACTION_ADD'].includes(packet.t)) return;
-        const channel = messisBot.channels.get(packet.d.channel_id);
-        const member = guild.members.get(packet.d.user_id);
-        if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
-            channel.fetchMessage(packet.d.message_id).then(message => {
-                const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-                const reaction = message.reactions.get(emoji);
-                if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
-                    bot.parroExists(message.author.id, message.id, function(err, parrotID) {
-                        if(parrotID === -1) {
-                            var announcement = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
-                            saveParrot(message);
-                            logEvent(announcement);
-                            toimitusPapukaija(channel.name, announcement, message);
-                        }
-                    });
-                }
-            });
+        if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
+            const guild = messisBot.guilds.get(auth.messis);
+            const channel = messisBot.channels.get(packet.d.channel_id);
+            const member = guild.members.get(packet.d.user_id);
+            if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
+                channel.fetchMessage(packet.d.message_id).then(message => {
+                    const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+                    const reaction = message.reactions.get(emoji);
+                    if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
+                        bot.parroExists(message.author.id, message.id, function(err, parrotID) {
+                            if(parrotID === -1) {
+                                var announcement = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
+                                saveParrot(message);
+                                logEvent(announcement);
+                                toimitusPapukaija(channel.name, announcement, message);
+                            }
+                        });
+                    }
+                });
+            }
         }
+        if (['GUILD_MEMBER_ADD'].includes(packet.t)) {
+            // uusi käyttäjä
+            logEvent('Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.');
+        }
+        if (['GUILD_MEMBER_REMOVE'].includes(packet.t)) {
+            // uusi käyttäjä
+            logEvent('Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.');
+        }
+    } else {
+        // Dev botti
     }
 });
 
@@ -87,13 +98,17 @@ messisBot.on('message', msg => {
 
         } else if(cmd === "channels" && msg.author.username === 'raybarg') {
             testGetChannels();
-    
-        } else if(cmd === "badgescores" && msg.author.username === 'raybarg') {
+
+        } else if(cmd === "badgescores") {
             badgeScoreList(msg);
     
-        } else if(cmd === "badgelist" && msg.author.username === 'raybarg') {
+        } else if(cmd === "badgelist") {
             var userName = msg.content.substring(11);
             badgeList(msg, userName);
+    
+        } else if(cmd === "channelbadgelist") {
+            var channelName = msg.content.substring(18);
+            channelBadgeList(msg, channelName);
     
         } else if(cmd === 'ajarooli' && msg.author.username === 'raybarg') {
             giveLotsofPermissions();
@@ -127,6 +142,10 @@ messisBot.on('message', msg => {
                 saveMessage(msg);
                 bot.messagesSynced++;
             }
+        }
+    } else {
+        if (!bPrivate) {
+
         }
     }
 });
@@ -614,7 +633,7 @@ function badgeScoreList(msg) {
 /**
  * Haetaan badgejen ansaintalista
  * @param {*} msg 
- * @param {*} strSearch 
+ * @param {*} userName 
  */
 function badgeList(msg, userName) {
     bot.getPAUserBadges(userName, function(err, rows) {
@@ -638,10 +657,34 @@ function badgeList(msg, userName) {
                 });
                 msg.channel.send(scoreList);
                 if(!(msg.channel instanceof Discord.DMChannel)) {
-                    // Komennon poisto ei toimi privachatissa
                     msg.delete(2000);
                 }
             }
         }
     });
 }
+
+/**
+ * Listaa annetulla kanavalla saadut badget
+ * @param {*} msg 
+ * @param {*} channelName 
+ */
+function channelBadgeList(msg, channelName) {
+    bot.getChannelBadges(channelName, function(err, rows) {
+        if (err) {
+            console.log(err);
+        } else {
+            if (rows) {
+                var badgeList = 'Badgelistaus kanavahaulla: `' + channelName + '`:\n\n';
+                rows.forEach(cols => {
+                    badgeList = '`' + cols[0].value.toString() + '`: ' + cols[2].value + '\n' + '' + cols[1].value + '\n\n';
+                    msg.channel.send(badgeList.substring(0,1999));
+                });
+                if(!(msg.channel instanceof Discord.DMChannel)) {
+                    msg.delete(2000);
+                }
+            }
+        }
+    });
+}
+
