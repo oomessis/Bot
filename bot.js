@@ -18,7 +18,7 @@ var bot = new BotCommon();
 var sqlConfig = sqlAuth;
 
 logger.remove(logger.transports.Console);
-logger.add(new logger.transports.Console, {
+logger.add(new logger.transports.Console(), {
     colorize: true
 });
 logger.level = 'debug';
@@ -76,6 +76,7 @@ messisBot.on('raw', packet => {
 });
 
 messisBot.on('message', msg => {
+    var userName = '';
     var bPrivate = false;
     var argv = msg.content.split(' ');
     var cmd = getCommand(argv[0]);
@@ -103,7 +104,7 @@ messisBot.on('message', msg => {
             badgeScoreList(msg);
     
         } else if(cmd === "badgelist") {
-            var userName = msg.content.substring(11);
+            userName = msg.content.substring(11);
             badgeList(msg, userName);
     
         } else if(cmd === "channelbadgelist") {
@@ -114,7 +115,7 @@ messisBot.on('message', msg => {
             giveLotsofPermissions();
     
         } else if(cmd === 'avatar') {
-            var userName = msg.content.substring(8);
+            userName = msg.content.substring(8);
             userTest(msg, userName);
     
         } else if(cmd === 'stat') {

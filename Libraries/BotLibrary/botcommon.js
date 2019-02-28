@@ -1,3 +1,4 @@
+/*jslint node: true */
 "use strict";
 var DataBase = require('../DatabaseLibrary/database.js');
 var DiscordMessage = require('../DatabaseLibrary/DiscordMessage.js');
@@ -80,55 +81,91 @@ class BotCommon {
 
     getLastID(callback) {
         this._DB.fetchLastID(function(err, lastID) {
-            callback(null, lastID);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, lastID);
+            }
         });
     }
 
     messageCount(callback) {
         this._DB.fetchMessageCount(function(err, total) {
-            callback(null, total);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, total);
+            }
         });
     }
 
     userMessageCount(userID, callback) {
         this._DB.fetchUserMessageCount(userID, function(err, msgCountList) {
-            callback(null, msgCountList);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, msgCountList);
+            }
         });
     }
 
     parroExists(userID, msgID, callback) {
         this._DB.parroExists(userID, msgID, function(err, parrotID) {
-            callback(null, parrotID);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, parrotID);
+            }
         });
     }
 
     wordCount(strSearch, callback) {
         this._DB.wordCount(strSearch, function(err, rows) {
-            callback(null, rows);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, rows);
+            }
         });
     }
 
     getChannels(callback) {
         this._DB.getChannels(function(err, channels) {
-            callback(null, channels);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, channels);
+            }
         });
     }
 
     getPABadgeScoreList(callback) {
         this._DB.getPABadgeScoreList(function(err, scoreList) {
-            callback(null, scoreList);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, scoreList);
+            }
         });
     }
 
     getPAUserBadges(strUserName, callback) {
         this._DB.getPAUserBadges(strUserName, function(err, badges) {
-            callback(null, badges);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, badges);
+            }
         });
     }
 
     getChannelBadges(strChannelName, callback) {
         this._DB.getChannelBadges(strChannelName, function(err, badges) {
-            callback(null, badges);
+            if(err) {
+                this.log(err);
+            } else {
+                callback(null, badges);
+            }
         });
     }
 
