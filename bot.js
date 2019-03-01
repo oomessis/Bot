@@ -297,6 +297,11 @@ function saveMessage(message) {
         return;
     }
 
+    if (!message.channel.id) {
+        console.log("Channel id is null!");
+        return;
+    }
+
     con.on('connect', function(err) {
         if (err) {
             console.log(err);
