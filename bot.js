@@ -56,7 +56,7 @@ messisBot.on('raw', packet => {
                                 console.log(err);
                             } else {
                                 if(parrotID === -1) {
-                                    saveParrot(message);
+                                    saveParrot(message, channel.id);
                                     toimitusPapukaija(channel.name, message);
                                 }
                             }
@@ -262,7 +262,9 @@ function syncHistory() {
 function syncNewMessages(lastMsgID) {
     const targetChannel = messisBot.channels.get(auth.yleinen);
     targetChannel.fetchMessages({ limit: bot.maxFetch, after: lastMsgID }).then(messages => {
-        bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
+        if (messages.size > 0) {
+            bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
+        }
         if (messages.size > 0) {
             bot.messagesSynced += messages.size;
             var d = new Date();
@@ -487,7 +489,7 @@ function saveChannel(guild, channel) {
  * Tallentaa yhden papukaijan tietokantaan
  * @param {*} message Viestin olio
  */
-function saveParrot(message) {
+function saveParrot(message, channelID) {
     var con = new Connection(sqlConfig);
     con.on('connect', function(err) {
         if (err) {
@@ -509,7 +511,7 @@ function saveParrot(message) {
             request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
             request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
             request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0,199));
-            request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
+            request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
             con.callProcedure(request);
         }
     });
