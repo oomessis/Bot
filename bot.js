@@ -291,6 +291,12 @@ function syncNewMessages(lastMsgID) {
  */
 function saveMessage(message) {
     var con = new Connection(sqlConfig);
+
+    if (!message.channel) {
+        console.log("Channel child object is null.");
+        return;
+    }
+
     con.on('connect', function(err) {
         if (err) {
             console.log(err);
