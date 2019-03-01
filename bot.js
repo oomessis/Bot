@@ -292,8 +292,8 @@ function syncNewMessages(lastMsgID) {
 function saveMessage(message) {
     var con = new Connection(sqlConfig);
 
-    if (!message.channel) {
-        console.log("Channel child object is null.");
+    // Ei tallenneta messis botin omia viestejä
+    if (message.author.id === auth.messisbot) {
         return;
     }
 
