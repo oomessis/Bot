@@ -82,7 +82,7 @@ class BotCommon {
     getLastID(callback) {
         this._DB.fetchLastID(function(err, lastID) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, lastID);
             }
@@ -92,7 +92,7 @@ class BotCommon {
     messageCount(callback) {
         this._DB.fetchMessageCount(function(err, total) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, total);
             }
@@ -102,7 +102,7 @@ class BotCommon {
     userMessageCount(userID, callback) {
         this._DB.fetchUserMessageCount(userID, function(err, msgCountList) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, msgCountList);
             }
@@ -112,7 +112,7 @@ class BotCommon {
     parroExists(userID, msgID, callback) {
         this._DB.parroExists(userID, msgID, function(err, parrotID) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, parrotID);
             }
@@ -122,7 +122,7 @@ class BotCommon {
     wordCount(strSearch, callback) {
         this._DB.wordCount(strSearch, function(err, rows) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, rows);
             }
@@ -132,7 +132,7 @@ class BotCommon {
     getChannels(callback) {
         this._DB.getChannels(function(err, channels) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, channels);
             }
@@ -142,7 +142,7 @@ class BotCommon {
     getPABadgeScoreList(callback) {
         this._DB.getPABadgeScoreList(function(err, scoreList) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, scoreList);
             }
@@ -152,7 +152,7 @@ class BotCommon {
     getPAUserBadges(strUserName, callback) {
         this._DB.getPAUserBadges(strUserName, function(err, badges) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, badges);
             }
@@ -162,7 +162,7 @@ class BotCommon {
     getChannelBadges(strChannelName, callback) {
         this._DB.getChannelBadges(strChannelName, function(err, badges) {
             if(err) {
-                this.log(err);
+                console.log(err);
             } else {
                 callback(null, badges);
             }

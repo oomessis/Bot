@@ -52,10 +52,8 @@ messisBot.on('raw', packet => {
                     if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
                         bot.parroExists(message.author.id, message.id, function(err, parrotID) {
                             if(parrotID === -1) {
-                                var announcement = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
                                 saveParrot(message);
-                                logEvent(announcement);
-                                toimitusPapukaija(channel.name, announcement, message);
+                                toimitusPapukaija(channel.name, message);
                             }
                         });
                     }
@@ -129,6 +127,10 @@ messisBot.on('message', msg => {
             if (!this.countingWords) {
                 wordCount(msg, strSearch);
             }
+
+        } else if(cmd === 'test' && msg.author.username === 'raybarg') {
+            //messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send('Sut on tägätty ' + msg.author));
+            msg.channel.send(msg.content.split('`').join(''));
             
         } else {
     
@@ -511,16 +513,26 @@ function saveParrot(message) {
  * @param {*} announcement 
  * @param {*} message 
  */
-function toimitusPapukaija(channelName, announcement, message) {
+function toimitusPapukaija(channelName, message) {
+    const announcement1 = 'Käyttäjän ' + message.author + ' kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
+    const announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
+    const content = message.content.split('`').join('');
+    
+    logEvent(announcement2);
+
     const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
     if (ch === null) {
-        messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(announcement));
+        messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(announcement2));
     } else {
-        ch.send(announcement);
+        ch.send(announcement2);
     }
     const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
     if (chYleinen) {
-        chYleinen.send(announcement + '\n```' + message.content + '```');
+        chYleinen.send(announcement1 + '\n```' + content + '```');
+    }
+    const chPuheenaiheet = messisBot.channels.find(ch => ch.id = auth.puheenaiheet);
+    if (chPuheenaiheet) {
+        chPuheenaiheet.send(announcement2 + '\n```' + content + '```');
     }
 }
 
