@@ -551,10 +551,12 @@ function toimitusPapukaija(channelName, message) {
     if (chYleinen) {
         chYleinen.send(announcement1 + '\n```' + content + '```');
     }
+    /*
     const chPuheenaiheet = messisBot.channels.find(ch => ch.id = auth.puheenaiheet);
     if (chPuheenaiheet) {
         chPuheenaiheet.send(announcement2 + '\n```' + content + '```');
     }
+    */
 }
 
 /**
