@@ -9,6 +9,7 @@ var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
 var TYPES = require('tedious').TYPES;
 var sqlAuth = require('./auth/azureauth.json');
+var sqlAuthLocalDB = require('./auth/sqlauth.json');
 var BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 var http = require('http');
 var request = require('request');
@@ -51,9 +52,13 @@ messisBot.on('raw', packet => {
                     const reaction = message.reactions.get(emoji);
                     if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
                         bot.parroExists(message.author.id, message.id, function(err, parrotID) {
-                            if(parrotID === -1) {
-                                saveParrot(message);
-                                toimitusPapukaija(channel.name, message);
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                if(parrotID === -1) {
+                                    saveParrot(message);
+                                    toimitusPapukaija(channel.name, message);
+                                }
                             }
                         });
                     }
@@ -70,6 +75,11 @@ messisBot.on('raw', packet => {
         }
     } else {
         // Dev botti
+        if (['PRESENCE_UPDATE'].includes(packet.t)) {
+            if (packet.d.guild_id === auth.messis) {
+                console.log(packet);
+            }
+        }
     }
 });
 
@@ -128,10 +138,6 @@ messisBot.on('message', msg => {
                 wordCount(msg, strSearch);
             }
 
-        } else if(cmd === 'test' && msg.author.username === 'raybarg') {
-            //messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send('Sut on tägätty ' + msg.author));
-            msg.channel.send(msg.content.split('`').join(''));
-            
         } else {
     
         }
@@ -262,7 +268,9 @@ function syncNewMessages(lastMsgID) {
             var d = new Date();
             var thisHour = d.getHours();
             if (thisHour !== bot.lastHour) {
-                logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
+                if (bot.messagesSynced > 0) {
+                    logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
+                }
 
                 bot.lastHour = thisHour;
                 bot.messagesSynced = 0;
@@ -701,3 +709,34 @@ function channelBadgeList(msg, channelName) {
     });
 }
 
+/**
+ * Tallentaa yhden presence updaten tietokantaan
+ * @param {*} packet 
+ */
+function savePresenceUpdate(packet) {
+    var con = new Connection(sqlAuthLocalDB);
+    con.on('connect', function(err) {
+        if (err) {
+            console.log(err);
+        } else {
+            var request = new Request('up_upd_ppresence_update', function(err) {
+                if (err) {
+                    console.log(err);
+                }
+                con.close();
+            });
+            // Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
+            var d = message.createdAt;
+            var dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+            request.addParameter('iParrot_id', TYPES.Int, 0);
+            request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
+            request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
+            request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
+            request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
+            request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
+            request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0,199));
+            request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
+            con.callProcedure(request);
+        }
+    });
+}
