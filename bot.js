@@ -297,6 +297,11 @@ function saveMessage(message) {
         return;
     }
 
+     // Ei tallenneta bottien omia viestejä.
+    if(message.author.bot === Boolean(true)) {
+        return;
+    }
+
     if (!message.channel.id) {
         console.log("Channel id is null!");
         return;
