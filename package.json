@@ -6,10 +6,11 @@
   "author": "Raybarg",
   "dependencies": {
     "discord.js": "^11.4.2",
+    "eslint": "^5.15.1",
     "flatted": "^2.0.0",
     "minimist": "^1.2.0",
     "request": "^2.88.0",
     "tedious": "^3.0.1",
-    "winston": "^3.1.0"
+    "winston": "^3.2.1"
   }
 }
