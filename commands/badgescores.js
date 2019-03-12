@@ -1,37 +1,41 @@
 const Discord = require('discord.js');
+const Connection = require("tedious").Connection;
+const Request = require('tedious').Request;
+const request = require('request');
 
 exports.run = (client, message, args, level) => {
-    let userName = '';
-    userName = message.author.username;
-    badgeList(message, userName);
+    badgeScoreList(message);
+
 
     /**
      * Haetaan badgejen ansaintalista
      * @param {*} msg
-     * @param {*} userName
+     * @param {*} strSearch
      */
-    function badgeList(msg, userName) {
-        client.bot.getPAUserBadges(userName, function(err, rows) {
+    function badgeScoreList(msg) {
+        client.bot.getPABadgeScoreList(function(err, rows) {
             if (err) {
-                console.log(err);
+                client.logger.error(err);
             } else {
                 if (rows) {
-                    let listedPaging = 0;
-                    let scoreList = 'Badgelistaus käyttäjänimihaulla: `' + userName + '`:\n\n';
+                    var listedPaging = 0;
+                    var scoreList = '```Montako kertaa puheenaihebadgeja ansaittu:\n';
                     rows.forEach(cols => {
                         if (cols[0].value > 0) {
                             listedPaging++;
-                            scoreList += '`' + cols[0].value.toString() + '`: ' + cols[2].value + '\n' + '' + cols[1].value + '\n\n';
+                            scoreList += cols[0].value.toString() + ' \t\t' + cols[1].value + '\n';
                             if (listedPaging >= 20) {
-                                scoreList += '';
+                                scoreList += '```';
                                 msg.channel.send(scoreList);
                                 listedPaging = 0;
-                                scoreList = '';
+                                scoreList = '```';
                             }
                         }
                     });
+                    scoreList += '```';
                     msg.channel.send(scoreList);
                     if(!(msg.channel instanceof Discord.DMChannel)) {
+                        // Komennon poisto ei toimi privachatissa
                         msg.delete(2000);
                     }
                 }
@@ -39,6 +43,7 @@ exports.run = (client, message, args, level) => {
         });
     }
 };
+
 
 exports.conf = {
     enabled: true,
@@ -48,8 +53,8 @@ exports.conf = {
 };
 
 exports.help = {
-    name: "badgelist",
-    category: "Statiikka",
-    description: "nimi> käyttäjän badget, pvm, linkki ja teksti.",
-    usage: "badgelist <nimi>"
+    name: "badgescores",
+    category: "Badget",
+    description: "Jonkin näköinen badge score lista.",
+    usage: "badgescores"
 };

@@ -18,7 +18,7 @@ exports.run = (client, message, args, level) => {
         const longest = commandNames.reduce((long, str) => Math.max(long, str.length), 0);
 
         let currentCategory = "";
-        let output = `= Komentolistaus =\n\n[Käytä ${message.settings.prefix}help <commandname> kemontoa jos haluat siitä lisätietoja]\n`;
+        let output = `= Komentolistaus =\n\n[Käytä ${message.settings.prefix}help <komennonnimi> jos haluat siitä lisätietoja]\n`;
         const sorted = myCommands.array().sort((p, c) => p.help.category > c.help.category ? 1 :  p.help.name > c.help.name && p.help.category === c.help.category ? 1 : -1 );
         sorted.forEach( c => {
             const cat = c.help.category.toProperCase();
@@ -44,12 +44,12 @@ exports.conf = {
     enabled: true,
     guildOnly: false,
     aliases: ["h", "halp"],
-    permLevel: "User"
+    permLevel: "Käyttäjä"
 };
 
 exports.help = {
     name: "help",
     category: "Järjestelmä",
     description: "Näyttää kaikki komennot, jotka voit oikeus tasollasi suorittaa.",
-    usage: "help [command]"
+    usage: "help [komento]"
 };

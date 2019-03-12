@@ -2,18 +2,18 @@ const auth = require('./auth/auth.json');
 
 const config = {
     // Bot Owner, level 10 by default. A User ID. Should never be anything else than the bot owner's ID.
-    "ownerID": "157970669261422592",
+    "ownerID": "274911966307418112",
 
     // Bot Admins, level 9 by default. Array of user ID strings.
-    "admins": [157970669261422592, 274911966307418112],
+    "admins": ["157970669261422592"],
 
     // Bot Support, level 8 by default. Array of user ID strings
-    "support": [402170717908500480],
+    "support": ["402170717908500480"],
 
     // Your Bot's Token. Available on https://discordapp.com/developers/applications/me
     "token": auth.token,
 
-    "raybargID": "",
+    "raybargID": "274911966307418112",
 
     // Default per-server settings. New guilds have these settings.
 
@@ -36,7 +36,7 @@ const config = {
     permLevels: [
         // This is the lowest permisison level, this is for non-roled users.
         { level: 0,
-            name: "User",
+            name: "Käyttäjä",
             // Don't bother checking, just return true which allows them to execute any command their
             // level allows them to.
             check: () => true
@@ -45,7 +45,7 @@ const config = {
         // This is your permission level, the staff levels should always be above the rest of the roles.
         { level: 2,
             // This is the name of the role.
-            name: "Moderator",
+            name: "Moderaattori",
             // The following lines check the guild the message came from for the roles.
             // Then it checks if the member that authored the message has the role.
             // If they do return true, which will allow them to execute the command in question.
@@ -61,7 +61,7 @@ const config = {
         },
 
         { level: 3,
-            name: "Administrator",
+            name: "Admin",
             check: (message) => {
                 try {
                     const adminRole = message.guild.roles.find(r => r.name.toLowerCase() === message.settings.adminRole.toLowerCase());
@@ -73,7 +73,7 @@ const config = {
         },
         // This is the server owner.
         { level: 4,
-            name: "Server Owner",
+            name: "Palvelimen omistaja",
             // Simple check, if the guild owner id matches the message author's ID, then it will return true.
             // Otherwise it will return false.
             check: (message) => message.channel.type === "text" ? (message.guild.ownerID === message.author.id ? true : false) : false
@@ -94,7 +94,7 @@ const config = {
 
         // Bot Admin has some limited access like rebooting the bot or reloading commands.
         { level: 9,
-            name: "Bot Admin",
+            name: "Botin Admin",
             check: (message) => config.admins.includes(message.author.id)
         },
 
@@ -102,7 +102,7 @@ const config = {
         // The reason this should be the highest level is because of dangerous commands such as eval
         // or exec (if the owner has that).
         { level: 10,
-            name: "Bot Owner",
+            name: "Botin omistaja",
             // Another simple check, compares the message author id to the one stored in the config file.
             check: (message) => message.client.config.ownerID === message.author.id
         }

@@ -192,6 +192,14 @@ class BotCommon {
 		const d = new Date();
 		console.log(d.toString() + ': ' + msg);
 	}
+
+	/**
+	 * Logitusviesti bottien omalle logituskanavalle
+	 * @param {*} msg
+	 */
+	logEvent(msg) {
+		this.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(msg));
+	}
 }
 
 module.exports = BotCommon;

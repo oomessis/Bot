@@ -92,7 +92,7 @@ exports.run = async (client, message, args, level) => {
      * @param {*} message Viestin olio
      */
     function saveMessage(message) {
-        var con = new Connection(sqlConfig);
+        const con = new Connection(sqlConfig);
 
         // Ei tallenneta messis botin omia viestejä
         if (message.author.id === auth.messisbot) {
@@ -113,15 +113,15 @@ exports.run = async (client, message, args, level) => {
             if (err) {
                 console.log(err);
             } else {
-                var request = new Request('up_upd_discord_messages', function(err) {
+                const request = new Request('up_upd_discord_messages', function(err) {
                     if (err) {
-                        console.log(err);
+                        client.logger.error(err);
                     }
                     con.close();
                 });
-                var d = message.createdAt;
+                let d = message.createdAt;
                 // Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-                var dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+                let dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
                 request.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
                 request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
                 request.addParameter('iDiscord_message_id', TYPES.Int, 0);

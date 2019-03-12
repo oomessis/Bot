@@ -14,9 +14,13 @@ const BotCommon = require('./botcommon.js');
 const bot = new BotCommon();
 
 
+// TODO: Tämän jos sisältää tiedostoon, niin tulee virhe nessage oliosta.
+
 class Utils {
 	constructor() {
 		this._saveMessage = this.saveMessage(message);
+		this._syncHistory = this.syncHistory();
+		this._getDisplayName = this.getDisplayName(msg);
 	}
 	/**
 	 * Tulkitaan msg-objektista userin nimi/nicki
@@ -49,14 +53,6 @@ class Utils {
 	}
 
 	/**
-	 * Logitusviesti bottien omalle logituskanavalle
-	 * @param {*} msg
-	 */
-	logEvent(msg) {
-		messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(msg));
-	}
-
-	/**
 	 * Intervaalikutsu uusien viestien synccaukseen
 	 */
 	syncHistory() {
@@ -65,7 +61,7 @@ class Utils {
 				console.log(err);
 			}
 			else {
-				Utils.syncNewMessages(lastMsgID);
+				Utils().syncNewMessages(lastMsgID);
 			}
 		});
 	}
