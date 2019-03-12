@@ -61,4 +61,8 @@ typings/
 .next
 
 # Auth data
+auth/
 Auth/
+
+# Random SQLite Data
+data/

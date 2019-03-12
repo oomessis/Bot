@@ -6,7 +6,7 @@ const TYPES = require('tedious').TYPES;
 const sqlAuth = require('../../auth/azureauth.json');
 const Connection = require('tedious').Connection;
 const Request = require('tedious').Request;
-
+const sqlConfig = sqlAuth;
 
 const BotCommon = require('./botcommon.js');
 
@@ -16,7 +16,7 @@ const bot = new BotCommon();
 
 class Utils {
 	constructor() {
-		this.bulkIndex = 0;
+		this._saveMessage = this.saveMessage(message);
 	}
 	/**
 	 * Tulkitaan msg-objektista userin nimi/nicki
@@ -29,107 +29,6 @@ class Utils {
 		else {
 			return msg.member.displayName;
 		}
-	}
-
-	savePresenceUpdate(packet) {
-		const con = new Connection(sqlAuthLocalDB);
-		con.on('connect', function(err) {
-			if (err) {
-				console.log(err);
-			}
-			else {
-				const request = new Request('up_upd_ppresence_update', function(err) {
-					if (err) {
-						console.log(err);
-					}
-					con.close();
-				});
-				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-				const d = Discord.message.createdAt;
-				const dateString = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
-				request.addParameter('iParrot_id', TYPES.Int, 0);
-				request.addParameter('iUser_id', TYPES.NVarChar, Discord.message.author.id);
-				request.addParameter('iMessage_id', TYPES.NVarChar, Discord.message.id.toString());
-				request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-				request.addParameter('strPerson_name', TYPES.NVarChar, Discord.message.author.username);
-				request.addParameter('strMessage_text', TYPES.NVarChar, Discord.message.content.substring(0, 1999));
-				request.addParameter('strMessage_url', TYPES.NVarChar, Discord.message.url.substring(0, 199));
-				request.addParameter('iChannel_id', TYPES.NVarChar, Discord.message.channel.id.toString());
-				con.callProcedure(request);
-			}
-		});
-	}
-
-
-	/**
-	 * Hakee viestihistorian kanavalta
-	 * @param {*} msg Discordin viestiolio, tämän oli tarkoitus toimia kanavan tokenin antajana, mutta nyt hakuun on tehty kanavan tokenin magic number
-	 */
-	fetchBulkHistory(msg) {
-		const targetChannel = bot.channels.get(auth.yleinen);
-		targetChannel.fetchMessages({ limit: bot.maxFetch, before: bot.lastID }).then(messages => {
-			bot.log(messages.size.toString());
-			const msgArr = messages.array();
-			for(let i = 0; i < msgArr.length; i++) {
-				Utils.saveMessage(msgArr[i]);
-			}
-			if(messages.size < bot.maxFetch) {
-				clearInterval(bot.bulkInterval);
-			}
-			else {
-				bot.lastID = msgArr[msgArr.length - 1].id;
-			}
-
-		}).catch(console.error);
-	}
-
-	/**
-	 * Tallentaa yhden viestin tietokantaan
-	 * @param {*} message Viestin olio
-	 */
-	saveMessage(message) {
-		const con = new Connection(sqlConfig);
-
-		// Ei tallenneta messis botin omia viestejä
-		if (message.author.id === auth.messisbot) {
-			return;
-		}
-
-		// Ei tallenneta bottien omia viestejä.
-		if(message.author.bot === Boolean(true)) {
-			return;
-		}
-
-		if (!message.channel.id) {
-			console.log('Channel id is null!');
-			return;
-		}
-
-		con.on('connect', function(err) {
-			if (err) {
-				console.log(err);
-			}
-			else {
-				const request = new Request('up_upd_discord_messages', function(err) {
-					if (err) {
-						console.log(err);
-					}
-					con.close();
-				});
-				const d = message.createdAt;
-				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-				const dateString = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
-				request.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
-				request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
-				request.addParameter('iDiscord_message_id', TYPES.Int, 0);
-				request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-				request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-				request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-				request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
-				request.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
-				con.callProcedure(request);
-			}
-		});
 	}
 
 	/**
@@ -246,11 +145,93 @@ class Utils {
 			}
 		}).catch(console.error);
 	}
+
+
+
+	/**
+	 * Tallentaa yhden papukaijan tietokantaan
+	 * @param {*} message Viestin olio
+	 */
+	saveParrot(message, channelID) {
+		const con = new Connection(sqlConfig);
+		con.on('connect', function(err) {
+			if (err) {
+				console.log(err);
+			}
+			else {
+				const request = new Request('up_upd_parrot', function(err) {
+					if (err) {
+						console.log(err);
+					}
+					con.close();
+				});
+				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
+				const d = message.createdAt;
+				const dateString = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+				request.addParameter('iParrot_id', TYPES.Int, 0);
+				request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
+				request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
+				request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
+				request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
+				request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
+				request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0, 199));
+				request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
+				con.callProcedure(request);
+			}
+		});
+	}
+
+
+	/**
+	 * Tallentaa yhden viestin tietokantaan
+	 * @param {*} message Viestin olio
+	 */
+	saveMessage(message) {
+		var con = new Connection(sqlConfig);
+
+		// Ei tallenneta messis botin omia viestejä
+		if (message.author.id === auth.messisbot) {
+			return;
+		}
+
+		// Ei tallenneta bottien omia viestejä.
+		if(message.author.bot === Boolean(true)) {
+			return;
+		}
+
+		if (!message.channel.id) {
+			console.log("Channel id is null!");
+			return;
+		}
+
+		con.on('connect', function(err) {
+			if (err) {
+				console.log(err);
+			} else {
+				var request = new Request('up_upd_discord_messages', function(err) {
+					if (err) {
+						console.log(err);
+					}
+					con.close();
+				});
+				var d = message.createdAt;
+				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
+				var dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+				request.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
+				request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
+				request.addParameter('iDiscord_message_id', TYPES.Int, 0);
+				request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
+				request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
+				request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
+				request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
+				request.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
+				con.callProcedure(request);
+			}
+		});
+	}
+
+
 }
 
-function create() {
-	return new Utils();
-}
 
 module.exports = Utils;
-module.exports = create;

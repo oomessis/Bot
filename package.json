@@ -5,10 +5,14 @@
   "main": "bot.js",
   "author": "Raybarg",
   "dependencies": {
+    "better-sqlite-pool": "^0.2.2",
+    "chalk": "^2.4.2",
     "discord.js": "^11.4.2",
+    "enmap": "^4.8.1",
     "eslint": "^5.15.1",
     "flatted": "^2.0.0",
     "minimist": "^1.2.0",
+    "moment": "^2.24.0",
     "request": "^2.88.0",
     "tedious": "^3.0.1",
     "winston": "^3.2.1"
