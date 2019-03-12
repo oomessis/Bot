@@ -556,12 +556,9 @@ function toimitusPapukaija(channelName, message) {
     if (chYleinen) {
         chYleinen.send(announcement1 + '\n```' + content + '```');
     }
-    /*
-    const chPuheenaiheet = messisBot.channels.find(ch => ch.id = auth.puheenaiheet);
-    if (chPuheenaiheet) {
-        chPuheenaiheet.send(announcement2 + '\n```' + content + '```');
-    }
-    */
+
+    /// Puheenaiheet kanavalle
+    messisBot.channels.filter(chPh => chPh.id === auth.puheenaiheet).map(async channelPh => await channelPh.send(announcement2));
 }
 
 /**
@@ -725,38 +722,6 @@ function channelBadgeList(msg, channelName) {
                     msg.delete(2000);
                 }
             }
-        }
-    });
-}
-
-/**
- * Tallentaa yhden presence updaten tietokantaan
- * @param {*} packet 
- */
-function savePresenceUpdate(packet) {
-    var con = new Connection(sqlAuthLocalDB);
-    con.on('connect', function(err) {
-        if (err) {
-            console.log(err);
-        } else {
-            var request = new Request('up_upd_ppresence_update', function(err) {
-                if (err) {
-                    console.log(err);
-                }
-                con.close();
-            });
-            // Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-            var d = message.createdAt;
-            var dateString = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-            request.addParameter('iParrot_id', TYPES.Int, 0);
-            request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
-            request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-            request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-            request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-            request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0,1999));
-            request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0,199));
-            request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
-            con.callProcedure(request);
         }
     });
 }
