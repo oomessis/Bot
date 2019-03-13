@@ -50,6 +50,6 @@ exports.conf = {
 exports.help = {
     name: "badgelist",
     category: "Statiikka",
-    description: "nimi> käyttäjän badget, pvm, linkki ja teksti.",
+    description: "<nimi> käyttäjän badget, pvm, linkki ja teksti.",
     usage: "badgelist <nimi>"
 };

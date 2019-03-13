@@ -54,7 +54,7 @@ exports.conf = {
 
 exports.help = {
     name: "badgescores",
-    category: "Badget",
+    category: "Statiikka",
     description: "Jonkin näköinen badge score lista.",
     usage: "badgescores"
 };

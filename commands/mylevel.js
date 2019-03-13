@@ -13,6 +13,6 @@ exports.conf = {
 exports.help = {
     name: "mylevel",
     category: "Sekalainen",
-    description: "Tells you your permission level for the current message location.",
+    description: "Kertoo käyttäjälle millä oikeus tasolla hän on",
     usage: "mylevel"
 };
