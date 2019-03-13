@@ -1,6 +1,6 @@
 exports.run = async (client, message, args, level) => {
     const friendly = client.config.permLevels.find(l => l.level === level).name;
-    message.reply(`Sinun oikeus tasosi on: ${level} - ${friendly}`);
+    message.reply(`Oikeus tasosi botille on: ${level} - ${friendly}`);
 };
 
 exports.conf = {
