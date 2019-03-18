@@ -1,6 +1,9 @@
 const auth = require('../auth/auth.json');
 const sqlAuth = require('../auth/azureauth.json');
 const Connection = require("tedious").Connection;
+const TYPES = require('tedious').TYPES;
+const request = require('request');
+const Request = require('tedious').Request;
 
 exports.run = (client, message, args, level) => {
     const sqlConfig = sqlAuth;

@@ -24,7 +24,7 @@ exports.run = (client, message, args, level) => {
         const targetChannel = client.channels.get(auth.yleinen);
         targetChannel.fetchMessages({ limit: client.maxFetch, after: lastMsgID }).then(messages => {
             if (messages.size > 0) {
-                client.log(messages.size.toString() + " / " + client.bot.maxFetch.toString());
+                client.logger.log(messages.size.toString() + " / " + client.bot.maxFetch.toString());
             }
             if (messages.size > 0) {
                 client.bot.messagesSynced += messages.size;

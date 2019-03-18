@@ -12,7 +12,7 @@ exports.run = (client, message, args, level) => {
      * @param {*} message
      */
     function userStat(message) {
-        client.bot.logEvent("Statistiikkaa käyttäjälle: " + getDisplayName(message));
+        logEvent("Statistiikkaa käyttäjälle: " + getDisplayName(message));
         client.bot.getLastID(function(err, lastMsgID) {
             syncNewMessages(lastMsgID);
             client.bot.messageCount(function(err, totalAllChannels) {
@@ -81,7 +81,7 @@ exports.run = (client, message, args, level) => {
         const targetChannel = client.channels.get(auth.yleinen);
         targetChannel.fetchMessages({ limit: client.maxFetch, after: lastMsgID }).then(messages => {
             if (messages.size > 0) {
-                client.bot.logEvent(messages.size.toString() + " / " + client.bot.maxFetch.toString());
+                logEvent(messages.size.toString() + " / " + client.bot.maxFetch.toString());
             }
             if (messages.size > 0) {
                 client.bot.messagesSynced += messages.size;
@@ -89,7 +89,7 @@ exports.run = (client, message, args, level) => {
                 let thisHour = d.getHours();
                 if (thisHour !== client.bot.lastHour) {
                     if (client.bot.messagesSynced > 0) {
-                        client.bot.logEvent("Syncronoitu viestejä: " + client.bot.messagesSynced.toString());
+                        logEvent("Syncronoitu viestejä: " + client.bot.messagesSynced.toString());
                     }
 
                     client.bot.lastHour = thisHour;
@@ -101,6 +101,14 @@ exports.run = (client, message, args, level) => {
                 saveMessage(msgArr[i]);
             }
         }).catch(console.error);
+    }
+
+    /**
+     * Logitusviesti bottien omalle logituskanavalle
+     * @param {*} message
+     */
+    function logEvent(message) {
+        client.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(message));
     }
 
     /**
@@ -149,6 +157,14 @@ exports.run = (client, message, args, level) => {
                 con.callProcedure(request);
             }
         });
+    }
+
+    /**
+     * Logitusviesti bottien omalle logituskanavalle
+     * @param {*} message
+     */
+    function logEvent(message) {
+        client.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(message));
     }
 };
 

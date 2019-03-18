@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 
 exports.run = (client, message, args, level) => {
-    let strSearch = message.content.substring(6);
+    let strSearch = message.content.substring(7);
     if (!this.countingWords) {
         wordCount(message, strSearch);
     }
