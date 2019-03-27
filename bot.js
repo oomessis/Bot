@@ -41,11 +41,11 @@ messisBot.on('error', () => bot.log('errored'));
 messisBot.login(auth.token);
 
 messisBot.on('guildMemberAdd', (member) => {
-	logEvent('Uusi käyttäjä (' + member.id + ') ' + member.username + ' liittyi serverille.');
+	logEvent('Uusi käyttäjä (' + member.id + ') ' + member + ' liittyi serverille.');
 });
 
 messisBot.on('guildMemberRemove', (member) => {
-	logEvent('Käyttäjä (' + member.id + ') ' + member.username + ' poistui serveriltä.');
+	logEvent('Käyttäjä (' + member.id + ') ' + member + ' poistui serveriltä.');
 });
 
 
