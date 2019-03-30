@@ -5,6 +5,7 @@ const Flatted = require('flatted');
 const Discord = require('discord.js');
 const logger = require('winston');
 const auth = require('./auth/auth.json');
+const snowflakes = require('./auth/snowflakes.json');
 const Connection = require('tedious').Connection;
 const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
@@ -28,9 +29,7 @@ const messisBot = new Discord.Client();
 messisBot.on('ready', () => {
 	if (auth.dev === 0) {
 		// Automaattinen viestien synkronointi
-		bot.syncInterval = setInterval(function () {
-			syncHistory();
-		}, 10000);
+		bot.syncInterval = setInterval(function () { syncHistory();	}, 10000);
 		messisBot.user.setActivity('Komennot: !help');
 	} else {
 		messisBot.user.setActivity('Its Time For Kablew!');
@@ -40,72 +39,37 @@ messisBot.on('ready', () => {
 messisBot.on('error', () => bot.log('errored'));
 messisBot.login(auth.token);
 
-messisBot.on('guildMemberAdd', (member) => {
-	logEvent('Uusi käyttäjä (' + member.id + ') ' + member + ' liittyi serverille.');
-});
-
-messisBot.on('guildMemberRemove', (member) => {
-	logEvent('Käyttäjä (' + member.id + ') ' + member + ' poistui serveriltä.');
-});
-
-
 // Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
 // Suoritetaan vain joso botti ei ole development versio
 messisBot.on('raw', packet => {
-	if (auth.dev === 0) {
-		if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-			const guild = messisBot.guilds.get(auth.messis);
-			const channel = messisBot.channels.get(packet.d.channel_id);
-			const member = guild.members.get(packet.d.user_id);
-			if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
-				channel.fetchMessage(packet.d.message_id).then(message => {
-					const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-					const reaction = message.reactions.get(emoji);
-					if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'juttu') {
-						bot.parroExists(message.author.id, message.id, function (err, parrotID) {
-							if (err) {
-								console.log(err);
-							} else {
-								if (parrotID === -1) {
-									saveParrot(message, channel.id);
-									toimitusPapukaija(channel.name, message);
-								}
-							}
-						});
-					}
-				});
-			}
-		}
-	} else {
-		// Dev botti
-		if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-			if (packet.d.guild_id === auth.messis) {
-				console.log(packet);
-			}
-		}
-		if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-			const guild = messisBot.guilds.get(auth.messis);
-			const channel = messisBot.channels.get(packet.d.channel_id);
-			const member = guild.members.get(packet.d.user_id);
-			if (member.roles.has(auth.tuotantotiimi) || member.roles.has(auth.yllapito)) {
-				channel.fetchMessage(packet.d.message_id).then(message => {
-					const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-					const reaction = message.reactions.get(emoji);
-					if (packet.t === 'MESSAGE_REACTION_ADD' && packet.d.emoji.name === 'tietohallinto') {
-						//toimitusPapukaija(channel.name, message);
-						console.log(packet.d)
-					}
-				});
-			}
-		}
-	}
+    if (auth.dev === 0) {
+        if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
+            handleReactions(packet);
+        }
+        if (['GUILD_MEMBER_ADD'].includes(packet.t)) {
+            logEvent('Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.');
+        }
+        if (['GUILD_MEMBER_REMOVE'].includes(packet.t)) {
+            logEvent('Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.');
+        }
+    } else {
+        if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
+            //if (packet.d.emoji.name !== 'juttu') handleReactions(packet);
+        }
+        // Dev botti
+        if (['PRESENCE_UPDATE'].includes(packet.t)) {
+            if (packet.d.guild_id === snowflakes.messis) {
+                //console.log(packet);
+            }
+        }
+    }
 });
 
 messisBot.on('message', msg => {
 	let userName = '';
 	let bPrivate = false;
-	const argv = msg.content.split(' ');
-	const cmd = getCommand(argv[0]);
+	let argv = msg.content.split(' ');
+	let cmd = getCommand(argv[0]);
 
 	if (msg.channel instanceof Discord.DMChannel) {
 		bPrivate = true;
@@ -580,10 +544,7 @@ function saveParrot(message, channelID) {
  * @param {*} message
  */
 function toimitusPapukaija(channelName, message) {
-	const announcement1 = 'Käyttäjän ' + message.author + ' kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
 	const announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
-	const puheenaihe_announchement = 'Kanavalla: ' + message.channel + ' ' + 'käyttäjältä: '+  message.author + '\n<' + message.url + '>';
-	const content = message.content.split('`').join('');
 
 	logEvent(announcement2);
 
@@ -595,11 +556,20 @@ function toimitusPapukaija(channelName, message) {
 	}
 	const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
 	if (chYleinen) {
-		chYleinen.send(announcement1 + '\n```' + content + '```');
+		chYleinen.send(announcementFromMessage(message));
 	}
 
 	// Puheenaiheet kanavalle
-	messisBot.channels.filter(chPh => chPh.id === auth.puheenaiheet).map(async channelPh => await channelPh.send(puheenaihe_announchement + '\n```' + content + '```'));
+	messisBot.channels.filter(chPh => chPh.id === auth.puheenaiheet).map(async channelPh => await channelPh.send(announcementFromMessage(message)));
+}
+
+/**
+ * Luodaan huomioviesti discord viestistä
+ * @param {*} message 
+ */
+function announcementFromMessage(message) {
+	let content = message.content.split('`').join(''); // Embediin viestisisältö josta stripattu embedimerkit
+	return 'Kanavalla: ' + message.channel + ' ' + 'käyttäjältä: '+  message.author + '\n<' + message.url + '>' +  '\n```' + content + '```';
 }
 
 /**
@@ -767,4 +737,53 @@ function channelBadgeList(msg, channelName) {
 			}
 		}
 	});
+}
+
+/**
+ * Reaktion lisäyksen käsittely
+ * @param {*} packet 
+ */
+function handleReactions(packet) {
+    let guild = messisBot.guilds.get(snowflakes.messis);
+    let sourceGuild = packet.d.guild_id;
+    let channel = messisBot.channels.get(packet.d.channel_id);
+    let member = guild.members.get(packet.d.user_id);
+    if (member.roles.has(snowflakes.tuotantotiimi) || member.roles.has(snowflakes.yllapito) || sourceGuild === '538291564934332416') {
+        channel.fetchMessage(packet.d.message_id).then(message => {
+            //const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
+            //const reaction = message.reactions.get(emoji);
+            if (packet.d.emoji.name === 'juttu') {
+                bot.parroExists(message.author.id, message.id, function(err, parrotID) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        if(parrotID === -1) {
+                            saveParrot(message, channel.id);
+                            toimitusPapukaija(channel.name, message);
+                        }
+                    }
+                });
+            } else if (packet.d.emoji.name === 'tietohallinto') {
+                // tietohallinto guild: 538291564934332416
+				// feed: 555072604168519721
+				messisBot.channels.filter(
+					ch => ch.id === snowflakes.channels.find(e => e.name === 'TietohallintoFeed').id
+				).map(
+					async channelPh => await channelPh.send(announcementFromMessage(message))
+				);
+			} else if (packet.d.emoji.name === 'toimitus') {
+				messisBot.channels.filter(
+					ch => ch.id === snowflakes.channels.find(e => e.name === 'ToimitusFeed').id
+				).map(
+					async channelPh => await channelPh.send(announcementFromMessage(message))
+				);
+			} else if (packet.d.emoji.name === 'ohjelma') {
+				messisBot.channels.filter(
+					ch => ch.id === snowflakes.channels.find(e => e.name === 'OhjelmaFeed').id
+				).map(
+					async channelPh => await channelPh.send(announcementFromMessage(message))
+				);
+            }
+        });
+    }
 }
