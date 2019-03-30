@@ -102,7 +102,7 @@ messisBot.on('message', msg => {
 			badgeList(msg, userName);
 
 		} else if (cmd === "channelbadgelist") {
-			const channelName = msg.content.substring(18);
+			let channelName = msg.content.substring(18);
 			channelBadgeList(msg, channelName);
 
 		} else if (cmd === 'ajarooli' && msg.author.username === 'raybarg') {
@@ -119,7 +119,7 @@ messisBot.on('message', msg => {
 			helpSpam(msg);
 
 		} else if (cmd === "sana") {
-			const strSearch = msg.content.substring(6);
+			let strSearch = msg.content.substring(6);
 			if (!this.countingWords) {
 				wordCount(msg, strSearch);
 			}
@@ -150,10 +150,10 @@ messisBot.on('message', msg => {
  * @param {*} msg Discordin viestiolio, tämän oli tarkoitus toimia kanavan tokenin antajana, mutta nyt hakuun on tehty kanavan tokenin magic number
  */
 function fetchBulkHistory(msg) {
-	const targetChannel = messisBot.channels.get(auth.yleinen);
+	let targetChannel = messisBot.channels.get(auth.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, before: bot.lastID}).then(messages => {
 		bot.log(messages.size.toString());
-		const msgArr = messages.array();
+		let msgArr = messages.array();
 		for (let i = 0; i < msgArr.length; i++) {
 			saveMessage(msgArr[i]);
 		}
@@ -173,7 +173,7 @@ function fetchBulkHistory(msg) {
  */
 function wordCount(msg, strSearch) {
 	bot.wordCount(strSearch, function (err, rows) {
-		const embed = new Discord.RichEmbed();
+		let embed = new Discord.RichEmbed();
 		let chanList = '';
 
 		if (err) {
@@ -217,8 +217,8 @@ function wordCount(msg, strSearch) {
  * @param {*} b
  */
 function compare(a, b) {
-	const ay = a[0].value;
-	const by = b[0].value;
+	let ay = a[0].value;
+	let by = b[0].value;
 	if (ay < by) {
 		return 1;
 	}
@@ -246,15 +246,15 @@ function syncHistory() {
  * @param {*} lastMsgID Tokeni jonka jälkeen tulleita viestejä haetaan
  */
 function syncNewMessages(lastMsgID) {
-	const targetChannel = messisBot.channels.get(auth.yleinen);
+	let targetChannel = messisBot.channels.get(auth.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, after: lastMsgID}).then(messages => {
 		if (messages.size > 0) {
 			bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
 		}
 		if (messages.size > 0) {
 			bot.messagesSynced += messages.size;
-			const d = new Date();
-			const thisHour = d.getHours();
+			let d = new Date();
+			let thisHour = d.getHours();
 			if (thisHour !== bot.lastHour) {
 				if (bot.messagesSynced > 0) {
 					logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
@@ -264,7 +264,7 @@ function syncNewMessages(lastMsgID) {
 				bot.messagesSynced = 0;
 			}
 		}
-		const msgArr = messages.array();
+		let msgArr = messages.array();
 		for (let i = 0; i < msgArr.length; i++) {
 			saveMessage(msgArr[i]);
 		}
@@ -276,7 +276,7 @@ function syncNewMessages(lastMsgID) {
  * @param {*} message Viestin olio
  */
 function saveMessage(message) {
-	const con = new Connection(sqlConfig);
+	let con = new Connection(sqlConfig);
 
 	// Ei tallenneta messis botin omia viestejä
 	if (message.author.id === auth.messisbot) {
@@ -297,15 +297,15 @@ function saveMessage(message) {
 		if (err) {
 			console.log(err);
 		} else {
-			const request = new Request('up_upd_discord_messages', function (err) {
+			let request = new Request('up_upd_discord_messages', function (err) {
 				if (err) {
 					console.log(err);
 				}
 				con.close();
 			});
-			const d = message.createdAt;
+			let d = message.createdAt;
 			// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-			const dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+			let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
 			request.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
 			request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
 			request.addParameter('iDiscord_message_id', TYPES.Int, 0);
@@ -349,7 +349,7 @@ function testGetChannels() {
  * Annetaan kaikille guildin jäsenille yleisrooli
  */
 function giveLotsofPermissions() {
-	const target = messisBot.guilds.get(auth.messis);
+	let target = messisBot.guilds.get(auth.messis);
 	console.log(target);
 	target.members.filter(m => !m.user.bot && !m.roles.has(auth.yleisrooli)).map(async member => await member.addRole(auth.yleisrooli).catch(console.error));
 }
@@ -361,7 +361,7 @@ function giveLotsofPermissions() {
  */
 function userTest(msg, u) {
 	logEvent("Avatar käyttäjästä " + u + " : " + msg.author.username);
-	const guild = messisBot.guilds.get(auth.messis);
+	let guild = messisBot.guilds.get(auth.messis);
 	guild.members.filter(m => m.user.username === u).map(member => {
 		msg.author.send(u + ' käyttäjän avatar url: ' + member.user.avatarURL);
 	});
@@ -384,7 +384,7 @@ function userStat(msg) {
 						console.log(err);
 					} else {
 						if (totalUserList) {
-							const embed = new Discord.RichEmbed();
+							let embed = new Discord.RichEmbed();
 							let total = 0;
 							let listed = 0;
 							let chanList = '';
@@ -426,7 +426,7 @@ function userStat(msg) {
  */
 function helpSpam(msg) {
 	logEvent("Helppilistaus käyttäjälle: " + msg.author.username);
-	const reply = {
+	let reply = {
 		embed: {
 			color: 3447003,
 			title: "Messis Bot Komentolistaus",
@@ -484,12 +484,12 @@ function logEvent(msg) {
  * @param {*} channel Kanavan olio
  */
 function saveChannel(guild, channel) {
-	const con = new Connection(sqlConfig);
+	let con = new Connection(sqlConfig);
 	con.on('connect', function (err) {
 		if (err) {
 			console.log(err);
 		} else {
-			const request = new Request('up_upd_discord_channels', function (err) {
+			let request = new Request('up_upd_discord_channels', function (err) {
 				if (err) {
 					console.log(err);
 				}
@@ -510,20 +510,20 @@ function saveChannel(guild, channel) {
  * @param {*} message Viestin olio
  */
 function saveParrot(message, channelID) {
-	const con = new Connection(sqlConfig);
+	let con = new Connection(sqlConfig);
 	con.on('connect', function (err) {
 		if (err) {
 			console.log(err);
 		} else {
-			const request = new Request('up_upd_parrot', function (err) {
+			let request = new Request('up_upd_parrot', function (err) {
 				if (err) {
 					console.log(err);
 				}
 				con.close();
 			});
 			// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-			const d = message.createdAt;
-			const dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+			let d = message.createdAt;
+			let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
 			request.addParameter('iParrot_id', TYPES.Int, 0);
 			request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
 			request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
@@ -544,17 +544,17 @@ function saveParrot(message, channelID) {
  * @param {*} message
  */
 function toimitusPapukaija(channelName, message) {
-	const announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
+	let announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
 
 	logEvent(announcement2);
 
-	const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
+	let ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
 	if (ch === null) {
 		messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(announcement2));
 	} else {
 		ch.send(announcement2);
 	}
-	const chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
+	let chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
 	if (chYleinen) {
 		chYleinen.send(announcementFromMessage(message));
 	}
@@ -600,14 +600,14 @@ function massSync() {
  */
 function fetchBulkHistoryAllChannels() {
 	if (bot.channels[bot.bulkIndex] !== auth.yleinen) {
-		const targetChannel = messisBot.channels.get(bot.channels[bot.bulkIndex]);
+		let targetChannel = messisBot.channels.get(bot.channels[bot.bulkIndex]);
 		if (targetChannel) {
-			const can_read_history = targetChannel.permissionsFor(messisBot.user.id).has("READ_MESSAGE_HISTORY", false);
-			const can_view_channel = targetChannel.permissionsFor(messisBot.user.id).has("VIEW_CHANNEL", false);
+			let can_read_history = targetChannel.permissionsFor(messisBot.user.id).has("READ_MESSAGE_HISTORY", false);
+			let can_view_channel = targetChannel.permissionsFor(messisBot.user.id).has("VIEW_CHANNEL", false);
 			if (can_read_history && can_view_channel) {
 				targetChannel.fetchMessages({limit: bot.maxFetch, before: bot.lastID}).then(messages => {
 					bot.log(bot.channels[bot.bulkIndex] + ' -> ' + messages.size.toString());
-					const msgArr = messages.array();
+					let msgArr = messages.array();
 					for (let i = 0; i < msgArr.length; i++) {
 						saveMessage(msgArr[i]);
 					}
