@@ -150,7 +150,7 @@ messisBot.on('message', msg => {
  * @param {*} msg Discordin viestiolio, tämän oli tarkoitus toimia kanavan tokenin antajana, mutta nyt hakuun on tehty kanavan tokenin magic number
  */
 function fetchBulkHistory(msg) {
-	let targetChannel = messisBot.channels.get(auth.yleinen);
+	let targetChannel = messisBot.channels.get(snowflakes.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, before: bot.lastID}).then(messages => {
 		bot.log(messages.size.toString());
 		let msgArr = messages.array();
@@ -246,7 +246,7 @@ function syncHistory() {
  * @param {*} lastMsgID Tokeni jonka jälkeen tulleita viestejä haetaan
  */
 function syncNewMessages(lastMsgID) {
-	let targetChannel = messisBot.channels.get(auth.yleinen);
+	let targetChannel = messisBot.channels.get(snowflakes.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, after: lastMsgID}).then(messages => {
 		if (messages.size > 0) {
 			bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
@@ -279,7 +279,7 @@ function saveMessage(message) {
 	let con = new Connection(sqlConfig);
 
 	// Ei tallenneta messis botin omia viestejä
-	if (message.author.id === auth.messisbot) {
+	if (message.author.id === snowflakes.messisbot) {
 		return;
 	}
 
@@ -324,7 +324,7 @@ function saveMessage(message) {
  */
 function testGetChannels() {
 	messisBot.guilds.forEach((guild) => {
-		if (guild.id === auth.messis) {
+		if (guild.id === snowflakes.messis) {
 			let spam = '';
 			let count = 0;
 			console.log(" - " + guild.name);
@@ -349,9 +349,9 @@ function testGetChannels() {
  * Annetaan kaikille guildin jäsenille yleisrooli
  */
 function giveLotsofPermissions() {
-	let target = messisBot.guilds.get(auth.messis);
+	let target = messisBot.guilds.get(snowflakes.messis);
 	console.log(target);
-	target.members.filter(m => !m.user.bot && !m.roles.has(auth.yleisrooli)).map(async member => await member.addRole(auth.yleisrooli).catch(console.error));
+	target.members.filter(m => !m.user.bot && !m.roles.has(snowflakes.yleisrooli)).map(async member => await member.addRole(snowflakes.yleisrooli).catch(console.error));
 }
 
 /**
@@ -361,7 +361,7 @@ function giveLotsofPermissions() {
  */
 function userTest(msg, u) {
 	logEvent("Avatar käyttäjästä " + u + " : " + msg.author.username);
-	let guild = messisBot.guilds.get(auth.messis);
+	let guild = messisBot.guilds.get(snowflakes.messis);
 	guild.members.filter(m => m.user.username === u).map(member => {
 		msg.author.send(u + ' käyttäjän avatar url: ' + member.user.avatarURL);
 	});
@@ -475,7 +475,7 @@ function getCommand(arg) {
  * @param {*} msg
  */
 function logEvent(msg) {
-	messisBot.channels.filter(ch => ch.id === auth.automaatio).map(async channel => await channel.send(msg));
+	messisBot.channels.filter(ch => ch.id === snowflakes.automaatio).map(async channel => await channel.send(msg));
 }
 
 /**
@@ -548,19 +548,19 @@ function toimitusPapukaija(channelName, message) {
 
 	logEvent(announcement2);
 
-	let ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === auth.toimitus);
+	let ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === snowflakes.toimitus);
 	if (ch === null) {
-		messisBot.channels.filter(ch => ch.id === auth.toimituspapukaija).map(async channel => await channel.send(announcement2));
+		messisBot.channels.filter(ch => ch.id === snowflakes.toimituspapukaija).map(async channel => await channel.send(announcement2));
 	} else {
 		ch.send(announcement2);
 	}
-	let chYleinen = messisBot.channels.find(ch => ch.id = auth.yleinen);
+	let chYleinen = messisBot.channels.find(ch => ch.id = snowflakes.yleinen);
 	if (chYleinen) {
 		chYleinen.send(announcementFromMessage(message));
 	}
 
 	// Puheenaiheet kanavalle
-	messisBot.channels.filter(chPh => chPh.id === auth.puheenaiheet).map(async channelPh => await channelPh.send(announcementFromMessage(message)));
+	messisBot.channels.filter(chPh => chPh.id === snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcementFromMessage(message)));
 }
 
 /**
@@ -599,7 +599,7 @@ function massSync() {
  * Hakee viestihistorian kanavilta
  */
 function fetchBulkHistoryAllChannels() {
-	if (bot.channels[bot.bulkIndex] !== auth.yleinen) {
+	if (bot.channels[bot.bulkIndex] !== snowflakes.yleinen) {
 		let targetChannel = messisBot.channels.get(bot.channels[bot.bulkIndex]);
 		if (targetChannel) {
 			let can_read_history = targetChannel.permissionsFor(messisBot.user.id).has("READ_MESSAGE_HISTORY", false);
