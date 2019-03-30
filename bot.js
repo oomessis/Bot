@@ -314,7 +314,7 @@ function saveMessage(message) {
 			request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
 			request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
 			request.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
-			con.callProcedure(request).catch(console.error);;
+			con.callProcedure(request);
 		}
 	});
 }
@@ -500,7 +500,7 @@ function saveChannel(guild, channel) {
 			request.addParameter('iChannel_id', TYPES.NVarChar, channel.id.toString());
 			request.addParameter('strChannel_name', TYPES.NVarChar, channel.name.toString());
 			request.addParameter('bChannel_tracked', TYPES.NVarChar, 0);
-			con.callProcedure(request).catch(console.error);;
+			con.callProcedure(request);
 		}
 	});
 }
@@ -532,7 +532,7 @@ function saveParrot(message, channelID) {
 			request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
 			request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0, 199));
 			request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
-			con.callProcedure(request).catch(console.error);
+			con.callProcedure(request);
 		}
 	});
 }
