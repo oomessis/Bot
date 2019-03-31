@@ -3,7 +3,7 @@ const util = require('util');
 const fs = require('fs');
 const Flatted = require('flatted');
 const Discord = require('discord.js');
-const logger = require('winston');
+//const logger = require('winston');
 const auth = require('./auth/auth.json');
 const snowflakes = require('./auth/snowflakes.json');
 const Connection = require('tedious').Connection;
@@ -20,11 +20,13 @@ const bot = new BotCommon();
 
 const sqlConfig = sqlAuth;
 
+/*
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console(), {
 	colorize: true
 });
 logger.level = 'debug';
+*/
 
 const messisBot = new Discord.Client();
 messisBot.on('ready', () => {
@@ -36,8 +38,11 @@ messisBot.on('ready', () => {
 		messisBot.user.setActivity('Its Time For Kablew!');
 	}
 });
-
-messisBot.on('error', () => bot.log('errored'));
+process.on('uncaughtException', (e) => {
+    console.info('uncaughtException even-listener has invoked');
+    console.error(e);
+});
+messisBot.on('error', () => bot.log('discord errored'));
 messisBot.login(auth.token);
 
 // Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
