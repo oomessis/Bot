@@ -55,7 +55,7 @@ messisBot.on('raw', packet => {
         }
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            if (packet.d.emoji.name !== 'juttu') handleReactions(packet);
+            //if (packet.d.emoji.name !== 'juttu') handleReactions(packet);
         }
         // Dev botti
         if (['PRESENCE_UPDATE'].includes(packet.t)) {
@@ -209,7 +209,7 @@ function wordCount(msg, strSearch) {
 
 			}
 		}
-	}).catch(console.error);
+	});
 }
 
 /**
@@ -239,7 +239,7 @@ function syncHistory() {
 		} else {
 			syncNewMessages(lastMsgID);
 		}
-	}).catch(console.error);
+	});
 }
 
 /**
@@ -415,9 +415,9 @@ function userStat(msg) {
 							}
 						}
 					}
-				}).catch(console.error);
+				});
 			}
-		}).catch(console.error);
+		});
 	});
 }
 
@@ -670,7 +670,7 @@ function badgeScoreList(msg) {
 				}
 			}
 		}
-	}).catch(console.error);
+	});
 }
 
 /**
@@ -704,7 +704,7 @@ function badgeList(msg, userName) {
 				}
 			}
 		}
-	}).catch(console.error);
+	});
 }
 
 /**
@@ -728,7 +728,7 @@ function channelBadgeList(msg, channelName) {
 				}
 			}
 		}
-	}).catch(console.error);
+	});
 }
 
 /**
@@ -774,6 +774,6 @@ function handleReactions(packet) {
 					async channelPh => await channelPh.send(common.announcementFromMessage(message))
 				);
             }
-        }).catch(console.error);
+        });
     }
 }
