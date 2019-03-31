@@ -14,6 +14,7 @@ const sqlAuthLocalDB = require('./auth/sqlauth.json');
 const BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 const http = require('http');
 const request = require('request');
+const common = require('./Libraries/CommonLibrary/common.js');
 
 const bot = new BotCommon();
 
@@ -54,7 +55,7 @@ messisBot.on('raw', packet => {
         }
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            //if (packet.d.emoji.name !== 'juttu') handleReactions(packet);
+            if (packet.d.emoji.name !== 'juttu') handleReactions(packet);
         }
         // Dev botti
         if (['PRESENCE_UPDATE'].includes(packet.t)) {
@@ -208,7 +209,7 @@ function wordCount(msg, strSearch) {
 
 			}
 		}
-	});
+	}).catch(console.error);
 }
 
 /**
@@ -238,7 +239,7 @@ function syncHistory() {
 		} else {
 			syncNewMessages(lastMsgID);
 		}
-	});
+	}).catch(console.error);
 }
 
 /**
@@ -414,9 +415,9 @@ function userStat(msg) {
 							}
 						}
 					}
-				});
+				}).catch(console.error);
 			}
-		});
+		}).catch(console.error);
 	});
 }
 
@@ -556,20 +557,11 @@ function toimitusPapukaija(channelName, message) {
 	}
 	let chYleinen = messisBot.channels.find(ch => ch.id = snowflakes.yleinen);
 	if (chYleinen) {
-		chYleinen.send(announcementFromMessage(message));
+		chYleinen.send(common.announcementFromMessage(message));
 	}
 
 	// Puheenaiheet kanavalle
-	messisBot.channels.filter(chPh => chPh.id === snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcementFromMessage(message)));
-}
-
-/**
- * Luodaan huomioviesti discord viestistä
- * @param {*} message 
- */
-function announcementFromMessage(message) {
-	let content = message.content.split('`').join(''); // Embediin viestisisältö josta stripattu embedimerkit
-	return 'Kanavalla: ' + message.channel + ' ' + 'käyttäjältä: '+  message.author + '\n<' + message.url + '>' +  '\n```' + content + '```';
+	messisBot.channels.filter(chPh => chPh.id === snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(common.announcementFromMessage(message)));
 }
 
 /**
@@ -678,7 +670,7 @@ function badgeScoreList(msg) {
 				}
 			}
 		}
-	});
+	}).catch(console.error);
 }
 
 /**
@@ -712,7 +704,7 @@ function badgeList(msg, userName) {
 				}
 			}
 		}
-	});
+	}).catch(console.error);
 }
 
 /**
@@ -736,7 +728,7 @@ function channelBadgeList(msg, channelName) {
 				}
 			}
 		}
-	});
+	}).catch(console.error);
 }
 
 /**
@@ -767,21 +759,21 @@ function handleReactions(packet) {
 				messisBot.channels.filter(
 					ch => ch.id === snowflakes.channels.find(e => e.name === 'TietohallintoFeed').id
 				).map(
-					async channelPh => await channelPh.send(announcementFromMessage(message))
+					async channelPh => await channelPh.send(common.announcementFromMessage(message))
 				);
 			} else if (packet.d.emoji.name === 'toimitus') {
 				messisBot.channels.filter(
 					ch => ch.id === snowflakes.channels.find(e => e.name === 'ToimitusFeed').id
 				).map(
-					async channelPh => await channelPh.send(announcementFromMessage(message))
+					async channelPh => await channelPh.send(common.announcementFromMessage(message))
 				);
 			} else if (packet.d.emoji.name === 'ohjelma') {
 				messisBot.channels.filter(
 					ch => ch.id === snowflakes.channels.find(e => e.name === 'OhjelmaFeed').id
 				).map(
-					async channelPh => await channelPh.send(announcementFromMessage(message))
+					async channelPh => await channelPh.send(common.announcementFromMessage(message))
 				);
             }
-        });
+        }).catch(console.error);
     }
 }
