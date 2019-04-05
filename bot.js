@@ -59,7 +59,7 @@ messisBot.on('raw', packet => {
         }
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            if (packet.d.emoji.name === 'staffi') handleReactions(packet);
+            //if (packet.d.emoji.name === 'staffi') handleReactions(packet);
         }
         // Dev botti
         if (['PRESENCE_UPDATE'].includes(packet.t)) {
@@ -502,14 +502,14 @@ function toimitusPapukaija(channelName, message) {
 	let announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
 
 	logEvent(announcement2);
-
-	let ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === snowflakes.toimitus);
+	
+	const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === snowflakes.toimitus);
 	if (ch === null) {
 		messisBot.channels.filter(ch => ch.id === snowflakes.toimituspapukaija).map(async channel => await channel.send(announcement2));
 	} else {
 		ch.send(announcement2);
 	}
-	let chYleinen = messisBot.channels.find(ch => ch.id = snowflakes.yleinen);
+	const chYleinen = messisBot.channels.find(ch => ch.id = snowflakes.yleinen);
 	if (chYleinen) {
 		chYleinen.send(common.announcementFromMessage(message));
 	}
