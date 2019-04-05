@@ -509,11 +509,8 @@ function toimitusPapukaija(channelName, message) {
 	} else {
 		ch.send(announcement2);
 	}
-	const chYleinen = messisBot.channels.find(ch => ch.id = snowflakes.yleinen);
-	if (chYleinen) {
-		chYleinen.send(common.announcementFromMessage(message));
-	}
-
+	// Yleinen kanavalle
+	messisBot.channels.filter(chYl => chYl.id === snowflakes.yleinen).map(async chYleinen => await chYleinen.send(common.announcementFromMessage(message)));
 	// Puheenaiheet kanavalle
 	messisBot.channels.filter(chPh => chPh.id === snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(common.announcementFromMessage(message)));
 }
