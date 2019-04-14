@@ -129,6 +129,9 @@ messisBot.on('message', msg => {
 				wordCount(msg, strSearch);
 			}
 
+		} else if (cmd === "avaa") {
+			managePaikkakunta(msg.content.substring(6), msg.author, msg.channel, bPrivate);
+
 		} else {
 
 		}
@@ -800,4 +803,48 @@ function saveChannel(guild, channel) {
 			con.callProcedure(request);
 		}
 	});
+}
+
+/**
+ * Lisää/poistaa annetun paikkakunnan kanavan oikeudet kutsuvalta käyttäjältä, lähettää viestin jos annettua kanavaa ei löytynyt
+ * @param {*} strPaikkakunta 
+ * @param {*} author 
+ */
+function managePaikkakunta(strPaikkakunta, author, channel, bPrivate) {
+	const channels = messisBot.channels.filter(ch => ch.parentID === snowflakes.categoryPaikkakunnat && ch.name.toLowerCase() === strPaikkakunta.toLowerCase());
+	if(channels.size > 0) {
+		channels.forEach(ch => {
+			const perms = ch.permissionOverwrites.get(author.id);
+			if(perms) {
+				// poistetaan
+				ch.permissionOverwrites.get(author.id).delete();
+				const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` poistettu.';
+				if (bPrivate) {
+					author.send(reply);
+				} else {
+					channel.send(reply);
+				}
+			} else {
+				// lisätään
+				ch.overwritePermissions(author.id, {
+					VIEW_CHANNEL: true,
+					SEND_MESSAGES: true,
+					READ_MESSAGE_HISTORY: true
+				}, 'Bottikomento');
+				const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` lisätty.';
+				if (bPrivate) {
+					author.send(reply);
+				} else {
+					channel.send(reply);
+				}
+			}
+		});
+	} else {
+		const reply = 'Kanavaa `' + strPaikkakunta + '` ei löytynyt.';
+		if (bPrivate) {
+			author.send(reply);
+		} else {
+			channel.send(reply);
+		}
+	}
 }
