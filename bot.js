@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const discordMessage = require('./Libraries/DatabaseLibrary/DiscordMessage.js');
 const util = require('util');
 const fs = require('fs');
