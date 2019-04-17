@@ -1,7 +1,9 @@
 /*jslint node: true */
 "use strict";
-var DataBase = require('../DatabaseLibrary/database.js');
-var DiscordMessage = require('../DatabaseLibrary/DiscordMessage.js');
+const Discord = require('discord.js');
+const DataBase = require('../DatabaseLibrary/database.js');
+const snowflakes = require('../../auth/snowflakes.json');
+
 
 /**
  * Luokka botin yleisille muuttujille niin saadaan ne pois global scopesta
@@ -13,7 +15,7 @@ class BotCommon {
         this._lastHour = -1;
         this._messagesSynced = 0;
         this._DB = new DataBase();
-        this._Discord = new DiscordMessage();
+        this._Client = new Discord.Client();
 
         this.channels = [];
         this.bulkIndex = 0;
@@ -77,6 +79,16 @@ class BotCommon {
     }
     get messagesSynced() {
         return this._messagesSynced;
+    }
+
+    /**
+     * Botticlienttiobjekti
+     */
+    set botClient(value) {
+        this._Client = value;
+    }
+    get botClient() {
+        return this._Client;
     }
 
     getLastID(callback) {
@@ -176,6 +188,14 @@ class BotCommon {
     log(msg) {
         var d = new Date();
         console.log(d.toString() + ': ' + msg);
+    }
+
+    /**
+     * Logitusviesti bottien omalle logituskanavalle
+     * @param {*} msg
+     */
+    logEvent(msg) {
+        this._Client.channels.filter(ch => ch.id === snowflakes.automaatio).map(async channel => await channel.send(msg));
     }
 }
 module.exports = BotCommon;

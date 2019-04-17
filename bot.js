@@ -1,66 +1,70 @@
 #!/usr/bin/env node
 const discordMessage = require('./Libraries/DatabaseLibrary/DiscordMessage.js');
-const util = require('util');
+//const util = require('util');
 const fs = require('fs');
-const Flatted = require('flatted');
+//const Flatted = require('flatted');
 const Discord = require('discord.js');
-//const logger = require('winston');
 const auth = require('./auth/auth.json');
 const snowflakes = require('./auth/snowflakes.json');
 const Connection = require('tedious').Connection;
 const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
 const sqlAuth = require('./auth/azureauth.json');
-const sqlAuthLocalDB = require('./auth/sqlauth.json');
+//const sqlAuthLocalDB = require('./auth/sqlauth.json');
 const BotCommon = require('./Libraries/BotLibrary/botcommon.js');
-const http = require('http');
-const request = require('request');
+//const http = require('http');
+//const request = require('request');
 const common = require('./Libraries/CommonLibrary/common.js');
+const paikkakunnat = require('./Libraries/BotLibrary/paikkakunnat.js');
+const reactions = require('./Libraries/BotLibrary/reactions.js');
 
 const bot = new BotCommon();
-
 const sqlConfig = sqlAuth;
+const botClient = new Discord.Client();
+bot.botClient = botClient;
 
-/*
-logger.remove(logger.transports.Console);
-logger.add(new logger.transports.Console(), {
-	colorize: true
+// Command and Event handlers.
+var commands = {};
+
+fs.readdir("./commands", (err, files) => {
+	for (const file of files) {
+		if (file.includes(".js")) {
+			commands[file.replace(".js", "")] = require(`./commands/${file}`);
+		}
+	}
 });
-logger.level = 'debug';
-*/
 
-const messisBot = new Discord.Client();
-messisBot.on('ready', () => {
+botClient.on('ready', () => {
 	if (auth.dev === 0) {
 		// Automaattinen viestien synkronointi
-		messisBot.user.setActivity('Komennot: !help');
+		botClient.user.setActivity('Komennot: !help');
 	} else {
-		messisBot.user.setActivity('Its Time For Kablew!');
+		botClient.user.setActivity('Its Time For Kablew!');
 	}
 });
 process.on('uncaughtException', (e) => {
     console.info('uncaughtException even-listener has invoked');
     console.error(e);
 });
-messisBot.on('error', () => bot.log('discord errored'));
-messisBot.login(auth.token);
+botClient.on('error', () => bot.log('discord errored'));
+botClient.login(auth.token);
 
 // Raaka paketin käsittely, reagoi jos viestiin lisätty reaktio ja reaktion lisääjällä on oikeudet kunnossa
 // Suoritetaan vain joso botti ei ole development versio
-messisBot.on('raw', packet => {
+botClient.on('raw', packet => {
     if (auth.dev === 0) {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            handleReactions(packet);
+            reactions.handleReactions(packet);
         }
         if (['GUILD_MEMBER_ADD'].includes(packet.t)) {
-            logEvent('Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.');
+            bot.logEvent('Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.');
         }
         if (['GUILD_MEMBER_REMOVE'].includes(packet.t)) {
-            logEvent('Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.');
+            bot.logEvent('Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.');
         }
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            //if (packet.d.emoji.name === 'staffi') handleReactions(packet);
+            reactions.handleReactions(packet);
         }
         // Dev botti
         if (['PRESENCE_UPDATE'].includes(packet.t)) {
@@ -71,11 +75,11 @@ messisBot.on('raw', packet => {
     }
 });
 
-messisBot.on('message', msg => {
+botClient.on('message', msg => {
 	let userName = '';
 	let bPrivate = false;
 	let argv = msg.content.split(' ');
-	let cmd = getCommand(argv[0]);
+	let cmd = common.getCommand(argv[0]);
 
 	if (msg.channel instanceof Discord.DMChannel) {
 		bPrivate = true;
@@ -111,37 +115,34 @@ messisBot.on('message', msg => {
 			let channelName = msg.content.substring(18);
 			channelBadgeList(msg, channelName);
 
-		} else if (cmd === 'ajarooli' && msg.author.username === 'raybarg') {
-			giveLotsofPermissions();
-
-		} else if (cmd === 'avatar') {
-			userName = msg.content.substring(8);
-			userTest(msg, userName);
-
-		} else if (cmd === 'stat') {
-			userStat(msg);
-
-		} else if (cmd === 'help') {
-			helpSpam(msg);
-
-		} else if (cmd === "sana") {
-			let strSearch = msg.content.substring(6);
-			if (!this.countingWords) {
-				wordCount(msg, strSearch);
-			}
-
 		} else if (cmd === "avaa") {
-			managePaikkakunta(msg.content.substring(6), msg.author, msg.channel, bPrivate);
+			paikkakunnat.managePaikkakunta(botClient, msg.content.substring(6), msg.author, msg.channel, bPrivate);
+
+		} else if (cmd === "imba") {
+			paikkakunnat.paikkaKuntaStat(msg.channel, msg.content.substring(6));
 
 		} else {
-
+			for (const cmd in commands) {
+				const command = commands[cmd];
+				const properties = command.properties;
+				const args = msg.content.split(" ");
+		
+				if (args[0].replace(auth.prefix, "") == properties.command) {
+					if (properties.arguments.length == 0) {
+						command.run(msg);
+					} else {
+						command.run(msg, args);
+					}
+				}
+			}
+		
 		}
 	}
 
 	if (!bPrivate && auth.dev === 0) {
 		// Reaaliaikainen syncronointi
 		if (msg.channel.id !== '532946068967784508' && msg.channel.id !== '524337438462836779' && msg.channel.id !== '502911862606659586') {
-			saveMessage(msg);
+			discordMessage.saveMessage(msg);
 			bot.messagesSynced++;
 		}
 	} else {
@@ -155,12 +156,12 @@ messisBot.on('message', msg => {
  * Hakee viestihistorian kanavalta
  */
 function fetchBulkHistory() {
-	let targetChannel = messisBot.channels.get(snowflakes.yleinen);
+	let targetChannel = botClient.channels.get(snowflakes.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, before: bot.lastID}).then(messages => {
 		bot.log(messages.size.toString());
 		let msgArr = messages.array();
 		for (let i = 0; i < msgArr.length; i++) {
-			saveMessage(msgArr[i]);
+			discordMessage.saveMessage(msgArr[i]);
 		}
 		if (messages.size < bot.maxFetch) {
 			clearInterval(bot.bulkInterval);
@@ -169,68 +170,6 @@ function fetchBulkHistory() {
 		}
 
 	}).catch(console.error);
-}
-
-/**
- * Haetaan lista montako kertaa sana toistuu eri kanavilla
- * @param {*} msg
- * @param {*} strSearch
- */
-function wordCount(msg, strSearch) {
-	bot.wordCount(strSearch, function (err, rows) {
-		let embed = new Discord.RichEmbed();
-		let chanList = '';
-
-		if (err) {
-			console.log(err);
-		} else {
-			if (rows) {
-				let total = 0;
-				let listed = 0;
-				embed.setTitle(getDisplayName(msg) + ' kysyi montako kertaa sana \"**' + strSearch + '**\" esiintyy kanavilla top 10:');
-				embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
-				rows.sort(compare);
-				rows.forEach(cols => {
-					if (cols[0].value > 0) {
-						listed++;
-						if (listed <= 10) {
-							chanList += listed.toString() + '. #' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
-						}
-						total += cols[0].value;
-					}
-				});
-				chanList += '---\n';
-				chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '**\n';
-				embed.setDescription(chanList);
-				msg.channel.send(embed).then(sentMsg => {
-					//sentMsg.delete(30000);
-				});
-				if (!(msg.channel instanceof Discord.DMChannel)) {
-					// Komennon poisto ei toimi privachatissa
-					msg.delete(2000);
-				}
-			} else {
-
-			}
-		}
-	});
-}
-
-/**
- * Listan sorttaus
- * @param {*} a
- * @param {*} b
- */
-function compare(a, b) {
-	let ay = a[0].value;
-	let by = b[0].value;
-	if (ay < by) {
-		return 1;
-	}
-	if (ay > by) {
-		return -1;
-	}
-	return 0;
 }
 
 /**
@@ -251,7 +190,7 @@ function syncHistory() {
  * @param {*} lastMsgID Tokeni jonka jälkeen tulleita viestejä haetaan
  */
 function syncNewMessages(lastMsgID) {
-	let targetChannel = messisBot.channels.get(snowflakes.yleinen);
+	let targetChannel = botClient.channels.get(snowflakes.yleinen);
 	targetChannel.fetchMessages({limit: bot.maxFetch, after: lastMsgID}).then(messages => {
 		if (messages.size > 0) {
 			bot.log(messages.size.toString() + " / " + bot.maxFetch.toString());
@@ -262,7 +201,7 @@ function syncNewMessages(lastMsgID) {
 			let thisHour = d.getHours();
 			if (thisHour !== bot.lastHour) {
 				if (bot.messagesSynced > 0) {
-					logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
+					bot.logEvent("Syncronoitu viestejä: " + bot.messagesSynced.toString());
 				}
 
 				bot.lastHour = thisHour;
@@ -271,259 +210,16 @@ function syncNewMessages(lastMsgID) {
 		}
 		let msgArr = messages.array();
 		for (let i = 0; i < msgArr.length; i++) {
-			saveMessage(msgArr[i]);
+			discordMessage.saveMessage(msgArr[i]);
 		}
 	}).catch(console.error);
-}
-
-/**
- * Tallentaa yhden viestin tietokantaan
- * @param {*} message Viestin olio
- */
-function saveMessage(message) {
-	let con = new Connection(sqlConfig);
-
-	// Ei tallenneta messis botin omia viestejä
-	if (message.author.id === snowflakes.messisbot) {
-		return;
-	}
-
-	// Ei tallenneta bottien omia viestejä.
-	if (message.author.bot === Boolean(true)) {
-		return;
-	}
-
-	if (!message.channel.id) {
-		console.log("Channel id is null!");
-		return;
-	}
-	con.on('error', function(err) {
-		console.log('Connection error: \n' + err);
-	});
-	con.on('connect', function (err) {
-		if (err) {
-			console.log(err);
-		} else {
-			let request = new Request('up_upd_discord_messages', function (err) {
-				if (err) {
-					console.log(err);
-				}
-				con.close();
-			});
-			let d = message.createdAt;
-			// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-			let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-			request.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
-			request.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
-			request.addParameter('iDiscord_message_id', TYPES.Int, 0);
-			request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-			request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-			request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-			request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
-			request.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
-			con.callProcedure(request);
-		}
-	});
-}
-
-/**
- * Annetaan kaikille guildin jäsenille yleisrooli
- */
-function giveLotsofPermissions() {
-	let target = messisBot.guilds.get(snowflakes.messis);
-	console.log(target);
-	target.members.filter(m => !m.user.bot && !m.roles.has(snowflakes.yleisrooli)).map(async member => await member.addRole(snowflakes.yleisrooli).catch(console.error));
-}
-
-/**
- * Näyttää privaviestinä jäsenen avatar-urlin komennon antajalle
- * @param {*} msg
- * @param {*} u
- */
-function userTest(msg, u) {
-	logEvent("Avatar käyttäjästä " + u + " : " + msg.author.username);
-	let guild = messisBot.guilds.get(snowflakes.messis);
-	guild.members.filter(m => m.user.username === u).map(member => {
-		msg.author.send(u + ' käyttäjän avatar url: ' + member.user.avatarURL);
-	});
-}
-
-/**
- * Statistiikkaa, kertoo montako viestiä on kanavalla ja montako kutsun antaneella jäsenellä
- * @param {*} msg
- */
-function userStat(msg) {
-	logEvent("Statistiikkaa käyttäjälle: " + getDisplayName(msg));
-	bot.getLastID(function (err, lastMsgID) {
-		if (err) {
-			console.log(err);
-		} else {
-			syncNewMessages(lastMsgID);
-		}
-		bot.messageCount(function (err, totalAllChannels) {
-			if (err) {
-				console.log(err);
-			} else {
-				bot.userMessageCount(msg.author.id, function (err, totalUserList) {
-					if (err) {
-						console.log(err);
-					} else {
-						if (totalUserList) {
-							let embed = new Discord.RichEmbed();
-							let total = 0;
-							let listed = 0;
-							let chanList = '';
-							let percent = 0;
-							embed.setTitle('Käyttäjän `' + getDisplayName(msg) + '` viestien statistiikkaa top 10:');
-							embed.setAuthor(messisBot.user.username, messisBot.user.displayAvatarURL);
-							totalUserList.sort(compare);
-							totalUserList.forEach(cols => {
-								if (cols[0].value > 0) {
-									listed++;
-									if (listed <= 10) {
-										chanList += listed.toString() + '. #' + cols[1].value + ' - **' + cols[0].value.toString() + '**\n';
-									}
-									total += cols[0].value;
-								}
-							});
-							percent = (total / totalAllChannels) * 100;
-							chanList += '---\n';
-							chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '** / **' + totalAllChannels.toString() + '**. Olet kirjoittanut ' + parseFloat(percent).toFixed(1) + '% Messiksen viesteistä.';
-							embed.setDescription(chanList);
-							msg.channel.send(embed).then(sentMsg => {
-								//sentMsg.delete(30000);
-							});
-							if (!(msg.channel instanceof Discord.DMChannel)) {
-								// Komennon poisto ei toimi privachatissa
-								msg.delete(2000);
-							}
-						}
-					}
-				});
-			}
-		});
-	});
-}
-
-/**
- * Lähetetään privaviestinä helppilistaus botin ymmärtämistä komennoista
- * @param {*} msg
- */
-function helpSpam(msg) {
-	logEvent("Helppilistaus käyttäjälle: " + msg.author.username);
-	let reply = {
-		embed: {
-			color: 3447003,
-			title: "Messis Bot Komentolistaus",
-			fields: [
-				{
-					name: "!stat",
-					value: "Oma käyttäjästatistiikkasi joka lähetetään privaattiviestinä.",
-					inline: false
-				},
-				{
-					name: "!sana <esimerkki>",
-					value: "Kanavakohtaine tilasto miten paljon sanaa 'esimerkki' on käytetty.",
-					inline: false
-				},
-				{name: "!badgescores", value: "Lista ansaituista badgeistä per käyttäjä.", inline: false},
-				{
-					name: "!badgelist <nimi>",
-					value: "<nimi> käyttäjän badget, pvm, linkki ja teksti.",
-					inline: false
-				},
-				{
-					name: "!avatar <käyttäjänimi>",
-					value: "Hakee annetulle käyttäjänimelle avatar-linkin ja lähettää sen privaattiviestinä. Käyttäjänimi pitää olla discord-tilin oikea käyttäjänimi (ei näkyvä nimi) ja sen on oltava case-sensitiivinen.\nEsim. !avatar raybarg\nKomento ei kerro mitään jos käyttäjän nimellä ei löytynyt profiilia.",
-					inline: false
-				}
-			]
-		}
-	};
-	msg.author.send(reply);
-	if (!(msg.channel instanceof Discord.DMChannel)) msg.delete(2000);
-}
-
-/**
- * Prefiksin käsittely, parsitaan itse komento, palautetaan tyhjä jos prefix ei täsmää
- * @param {*} arg
- */
-function getCommand(arg) {
-	if (arg.substring(0, 1) === auth.prefix) {
-		return arg.substring(1);
-	}
-	return '';
-}
-
-/**
- * Logitusviesti bottien omalle logituskanavalle
- * @param {*} msg
- */
-function logEvent(msg) {
-	messisBot.channels.filter(ch => ch.id === snowflakes.automaatio).map(async channel => await channel.send(msg));
-}
-
-
-/**
- * Tallentaa yhden papukaijan tietokantaan
- * @param {*} message Viestin olio
- */
-function saveParrot(message, channelID) {
-	let con = new Connection(sqlConfig);
-	con.on('connect', function (err) {
-		if (err) {
-			console.log(err);
-		} else {
-			let request = new Request('up_upd_parrot', function (err) {
-				if (err) {
-					console.log(err);
-				}
-				con.close();
-			});
-			// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-			let d = message.createdAt;
-			let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-			request.addParameter('iParrot_id', TYPES.Int, 0);
-			request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
-			request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-			request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-			request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-			request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
-			request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0, 199));
-			request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
-			con.callProcedure(request);
-		}
-	});
-}
-
-/**
- * Badgeviesti toimitukselle & yhteisölle
- * @param {*} channelName
- * @param {*} announcement
- * @param {*} message
- */
-function toimitusPapukaija(channelName, message) {
-	let announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
-
-	logEvent(announcement2);
-	
-	const ch = messisBot.channels.find(ch => ch.name === channelName && ch.guild.id === snowflakes.toimitus);
-	if (ch === null) {
-		messisBot.channels.filter(ch => ch.id === snowflakes.toimituspapukaija).map(async channel => await channel.send(announcement2));
-	} else {
-		ch.send(announcement2);
-	}
-	// Yleinen kanavalle
-	messisBot.channels.filter(chYl => chYl.id === snowflakes.yleinen).map(async chYleinen => await chYleinen.send(common.announcementFromMessage(message)));
-	// Puheenaiheet kanavalle
-	messisBot.channels.filter(chPh => chPh.id === snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(common.announcementFromMessage(message)));
 }
 
 /**
  * Kanavien historioiden haku
  */
 function massSync() {
-	console.log(messisBot.user.id);
+	console.log(botClient.user.id);
 	bot.getChannels(function (err, channels) {
 		if (err) {
 			console.log(err);
@@ -546,17 +242,19 @@ function massSync() {
  * Hakee viestihistorian kanavilta
  */
 function fetchBulkHistoryAllChannels() {
-	let targetChannel = messisBot.channels.get(bot.channels[bot.bulkIndex]);
+	let targetChannel = botClient.channels.get(bot.channels[bot.bulkIndex]);
 	if (targetChannel) {
-		let can_read_history = targetChannel.permissionsFor(messisBot.user.id).has("READ_MESSAGE_HISTORY", false);
-		let can_view_channel = targetChannel.permissionsFor(messisBot.user.id).has("VIEW_CHANNEL", false);
+		let can_read_history = targetChannel.permissionsFor(botClient.user.id).has("READ_MESSAGE_HISTORY", false);
+		let can_view_channel = targetChannel.permissionsFor(botClient.user.id).has("VIEW_CHANNEL", false);
 		if (can_read_history && can_view_channel) {
 			targetChannel.fetchMessages({limit: bot.maxFetch, before: bot.lastID}).then(messages => {
 				bot.log(bot.channels[bot.bulkIndex] + ' -> ' + messages.size.toString());
 				let msgArr = messages.array();
-				for (let i = 0; i < msgArr.length; i++) {
-					setTimeout(function() { saveMessage(msgArr[i]); }, 100 * (i+1));
-				}
+				let iLoop = 1;
+				messages.forEach(msg => {
+					setTimeout(function() { discordMessage.saveMessage(msg); }, 100 * (iLoop+1));
+					iLoop++;
+				});
 				if (messages.size < bot.maxFetch) {
 					bot.bulkIndex++;
 					bot.lastID = '';
@@ -575,18 +273,6 @@ function fetchBulkHistoryAllChannels() {
 	}
 	if (bot.bulkIndex >= bot.channels.length) {
 		clearInterval(bot.bulkInterval);
-	}
-}
-
-/**
- * Tulkitaan msg-objektista userin nimi/nicki
- * @param {*} msg
- */
-function getDisplayName(msg) {
-	if (msg.channel instanceof Discord.DMChannel) {
-		return msg.author.username;
-	} else {
-		return msg.member.displayName;
 	}
 }
 
@@ -685,76 +371,10 @@ function channelBadgeList(msg, channelName) {
 }
 
 /**
- * Reaktion lisäyksen käsittely
- * @param {*} packet 
- */
-function handleReactions(packet) {
-    let guild = messisBot.guilds.get(snowflakes.messis);
-    let sourceGuild = packet.d.guild_id;
-    let channel = messisBot.channels.get(packet.d.channel_id);
-    let member = guild.members.get(packet.d.user_id);
-    if (member.roles.has(snowflakes.tuotantotiimi) || member.roles.has(snowflakes.yllapito) || isTuotantotiimiGuild(sourceGuild)) {
-        channel.fetchMessage(packet.d.message_id).then(message => {
-            //const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-            //const reaction = message.reactions.get(emoji);
-            if (packet.d.emoji.name === 'juttu') {
-                bot.parroExists(message.author.id, message.id, function(err, parrotID) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        if(parrotID === -1) {
-                            saveParrot(message, channel.id);
-                            toimitusPapukaija(channel.name, message);
-                        }
-                    }
-                });
-            } else if (packet.d.emoji.name === 'tietohallinto') {
-				messisBot.channels.filter(
-					ch => ch.id === snowflakes.channels.find(e => e.name === 'TietohallintoFeed').id
-				).map(
-					async channelPh => await channelPh.send(common.announcementFromMessage(message))
-				);
-			} else if (packet.d.emoji.name === 'toimitus') {
-				messisBot.channels.filter(
-					ch => ch.id === snowflakes.channels.find(e => e.name === 'ToimitusFeed').id
-				).map(
-					async channelPh => await channelPh.send(common.announcementFromMessage(message))
-				);
-			} else if (packet.d.emoji.name === 'ohjelma') {
-				messisBot.channels.filter(
-					ch => ch.id === snowflakes.channels.find(e => e.name === 'OhjelmaFeed').id
-				).map(
-					async channelPh => await channelPh.send(common.announcementFromMessage(message))
-				);
-			} else if (packet.d.emoji.name === 'staffi') {
-				messisBot.channels.filter(
-					ch => ch.id === snowflakes.channels.find(e => e.name === 'StaffiFeed').id
-				).map(
-					async channelPh => await channelPh.send(common.announcementFromMessage(message))
-				);
-            }
-        });
-    }
-}
-
-/**
- * Onko annettu kilta tuotantotiimin kiltoja
- * @param {*} guildID 
- */
-function isTuotantotiimiGuild(guildID) {
-	let guild = snowflakes.servers.find(e => e.id === guildID);
-	if (guild) {
-		return guild.tuotanto;
-	} else {
-		return false;
-	}
-}
-
-/**
  * Testimetodi, haetaan botin tuntemat kanavat ja listataan ne konsoliin
  */
 function testGetChannels() {
-	messisBot.guilds.forEach((guild) => {
+	botClient.guilds.forEach((guild) => {
 		if (guild.id === snowflakes.messis) {
 			let spam = '';
 			let count = 0;
@@ -768,7 +388,7 @@ function testGetChannels() {
 					count++;
 				}
 			});
-			logEvent(count.toString() + ' kanavaa päivitetty tietokantaan.');
+			bot.logEvent(count.toString() + ' kanavaa päivitetty tietokantaan.');
 			console.log(spam);
 		} else {
 			console.log(guild);
@@ -806,46 +426,9 @@ function saveChannel(guild, channel) {
 	});
 }
 
-/**
- * Lisää/poistaa annetun paikkakunnan kanavan oikeudet kutsuvalta käyttäjältä, lähettää viestin jos annettua kanavaa ei löytynyt
- * @param {*} strPaikkakunta 
- * @param {*} author 
- */
-function managePaikkakunta(strPaikkakunta, author, channel, bPrivate) {
-	const channels = messisBot.channels.filter(ch => ch.parentID === snowflakes.categoryPaikkakunnat && ch.name.toLowerCase() === strPaikkakunta.toLowerCase());
-	if(channels.size > 0) {
-		channels.forEach(ch => {
-			const perms = ch.permissionOverwrites.get(author.id);
-			if(perms) {
-				// poistetaan
-				ch.permissionOverwrites.get(author.id).delete();
-				const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` poistettu.';
-				if (bPrivate) {
-					author.send(reply);
-				} else {
-					channel.send(reply);
-				}
-			} else {
-				// lisätään
-				ch.overwritePermissions(author.id, {
-					VIEW_CHANNEL: true,
-					SEND_MESSAGES: true,
-					READ_MESSAGE_HISTORY: true
-				}, 'Bottikomento');
-				const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` lisätty.';
-				if (bPrivate) {
-					author.send(reply);
-				} else {
-					channel.send(reply);
-				}
-			}
-		});
-	} else {
-		const reply = 'Kanavaa `' + strPaikkakunta + '` ei löytynyt.';
-		if (bPrivate) {
-			author.send(reply);
-		} else {
-			channel.send(reply);
-		}
-	}
-}
+exports.discord = Discord;
+exports.client = botClient;
+exports.bot = bot;
+exports.snowflakes = snowflakes;
+exports.common = common;
+exports.sqlConfig = sqlConfig;
