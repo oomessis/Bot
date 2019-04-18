@@ -14,13 +14,13 @@ const properties = {
  * Statistiikkaa, kertoo montako viestiä on kanavalla ja montako kutsun antaneella jäsenellä
  * @param {*} message 
  */
-function run(msg) {
-	app.bot.logEvent("Statistiikkaa käyttäjälle: " + app.common.getDisplayName(msg));
+function run(message) {
+	app.bot.logEvent("Statistiikkaa käyttäjälle: " + app.common.getDisplayName(message));
     app.bot.messageCount(function (err, totalAllChannels) {
         if (err) {
             console.log(err);
         } else {
-            app.bot.userMessageCount(msg.author.id, function (err, totalUserList) {
+            app.bot.userMessageCount(message.author.id, function (err, totalUserList) {
                 if (err) {
                     console.log(err);
                 } else {
@@ -30,7 +30,7 @@ function run(msg) {
                         let listed = 0;
                         let chanList = '';
                         let percent = 0;
-                        embed.setTitle('Käyttäjän `' + app.common.getDisplayName(msg) + '` viestien statistiikkaa top 10:');
+                        embed.setTitle('Käyttäjän `' + app.common.getDisplayName(message) + '` viestien statistiikkaa top 10:');
                         embed.setAuthor(app.client.user.username, app.client.user.displayAvatarURL);
                         totalUserList.sort(app.common.compare);
                         totalUserList.forEach(cols => {
@@ -46,12 +46,12 @@ function run(msg) {
                         chanList += '---\n';
                         chanList += 'Yhteensä kaikilta kanavilta: **' + total.toString() + '** / **' + totalAllChannels.toString() + '**. Olet kirjoittanut ' + parseFloat(percent).toFixed(1) + '% Messiksen viesteistä.';
                         embed.setDescription(chanList);
-                        msg.channel.send(embed).then(sentMsg => {
+                        message.channel.send(embed).then(sentMsg => {
                             //sentMsg.delete(30000);
                         });
-                        if (!(msg.channel instanceof app.discord.DMChannel)) {
+                        if (!(message.channel instanceof app.discord.DMChannel)) {
                             // Komennon poisto ei toimi privachatissa
-                            msg.delete(2000);
+                            message.delete(2000);
                         }
                     }
                 }
