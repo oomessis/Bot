@@ -13,7 +13,7 @@ const properties = {
 
 let bulkIndex;
 let bulkInterval;
-let lastID = '547723640637227028';
+let lastID = '563811333481562122';
 
 /**
  * Kanavien historioiden haku
@@ -60,7 +60,7 @@ function fetchBulkHistoryAllChannels() {
 				});
 				if (messages.size < app.bot.maxFetch) {
 					bulkIndex++;
-					lastID = '547723640637227028';
+					lastID = '563811333481562122';
 				} else {
 					lastID = msgArr[msgArr.length - 1].id;
 				}
