@@ -28,7 +28,7 @@ class reactions {
                             if(parrotID === -1) {
                                 let me = new reactions();
                                 me.saveParrot(message, channel.id);
-                                //me.toimitusPapukaija(channel.name, message);
+                                me.toimitusPapukaija(channel.name, message);
                             }
                         }
                     });
