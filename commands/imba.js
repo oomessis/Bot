@@ -6,15 +6,36 @@ const PImage = require('pureimage');
 const fs = require('fs');
 const snowflakes = require('./../auth/snowflakes.json');
 const app = require("./../bot.js");
+const linksimages = require("./../assets/linksimages.json");
 
 const properties = {
 	command: "imba",
 	description: "Testikomento.",
 	visible: true,
-	arguments: []
+	arguments: ["<arg1>"]
 };
 
-function run(message) {
+function run(message, args) {
+    let bIsLink;
+    let bIsAcceptedContent;
+    if (typeof args[1] !== 'undefined') {
+        let str = args[1];
+        linksimages.filter.forEach(element => {
+            if (message.content.includes(element.name)) {
+                if (element.include) {
+                    bIsLink = true;
+                } else {
+                    bIsAcceptedContent = true;
+                }
+            }
+        });
+
+        if(bIsLink && !bIsAcceptedContent) {
+            console.log("varoita!");
+        }
+    }
+
+    /*
     // Testataan miten voisi piirtää suomen kartta missä on määräpallukoita
     // Ladataan suomikuva
     PImage.decodePNGFromStream(fs.createReadStream('assets/suomi.png')).then((img) => {
@@ -43,6 +64,7 @@ function run(message) {
             });
         });
     });
+    */
 }
 exports.properties = properties;
 exports.run = run;

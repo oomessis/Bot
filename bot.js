@@ -72,27 +72,26 @@ botClient.on('message', msg => {
 		}
 	}
 	
-	    // Check if message contains links that are not images / media.
-    if (msg.content.includes("https://") || msg.content.includes("http://") && !msg.content.includes(".jpg") && !msg.content.includes(".png") && !msg.content.includes(".gif") && !msg.content.includes(".wmv") && !msg.content.includes(".vob") && !msg.content.includes(".mpg") && !msg.content.includes(".mpeg") && !msg.content.includes(".mp4") && !msg.content.includes(".mov") && !msg.content.includes(".avi") && !msg.content.includes(".bmp") && !msg.content.includes(".ico") && !msg.content.includes(".jpeg") && !msg.content.includes(".svg")) {
+    // Check if message contains links that are not images / media. (Only in dev atm.)
+    if (auth.dev === 1) {
+        if (msg.content.includes("https://") || msg.content.includes("http://") && !msg.content.includes(".jpg") && !msg.content.includes(".png") && !msg.content.includes(".gif") && !msg.content.includes(".wmv") && !msg.content.includes(".vob") && !msg.content.includes(".mpg") && !msg.content.includes(".mpeg") && !msg.content.includes(".mp4") && !msg.content.includes(".mov") && !msg.content.includes(".avi") && !msg.content.includes(".bmp") && !msg.content.includes(".ico") && !msg.content.includes(".jpeg") && !msg.content.includes(".svg")) {
     
-        // Removes the link from the message, counting the messages characters
-        const link = msg.content.replace(/https(\S+)?/g, '');
-
-        // Gets the character count of the message after removing the link from the message.
-        const characterCount = link.length;
-
-        // Checks if message less than (by default 50) characters, else do nothing
-        if (characterCount < 20) {
-
-        msg.delete();
-        msg.channel.send(`${msg.author} 👮 Messis-Poliisista päivää! Viestisi sisälsi linkin, mutta ei tarvittavaa kuvausta sille (min. 20 merkkiä). Kokeile uudestaan ja kerro hieman linkin kohteesta!`)
-        .then(msg => {
-          msg.delete(5000)
-        });
-
-        };
-
-    };
+            // Removes the link from the message, counting the messages characters
+            const link = msg.content.replace(/https(\S+)?/g, '');
+    
+            // Gets the character count of the message after removing the link from the message.
+            const characterCount = link.length;
+    
+            // Checks if message less than (by default 50) characters, else do nothing
+            if (characterCount < 20) {
+                msg.delete();
+                msg.channel.send(`${msg.author} 👮 Messis-Poliisista päivää! Viestisi sisälsi linkin, mutta ei tarvittavaa kuvausta sille (min. 20 merkkiä). Kokeile uudestaan ja kerro hieman linkin kohteesta!`)
+                .then(msg => {
+                    msg.delete(15000);
+                });
+            }
+        }
+    }
 });
 
 /**
