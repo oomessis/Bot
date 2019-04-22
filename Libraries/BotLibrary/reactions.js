@@ -16,7 +16,7 @@ class reactions {
         let sourceGuild = packet.d.guild_id;
         let channel = app.client.channels.get(packet.d.channel_id);
         let member = guild.members.get(packet.d.user_id);
-        if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild)) {
+        if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild) || member.roles.has(app.snowflakes.paimen)) {
             channel.fetchMessage(packet.d.message_id).then(message => {
                 //const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
                 //const reaction = message.reactions.get(emoji);
