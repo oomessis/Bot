@@ -16,7 +16,7 @@ const properties = {
  * @param {*} message 
  */
 function run(message) {
-    if (message.author.username === 'raybarg') {
+    if (message.author.id === app.snowflakes.admin) {
         let chan = app.client.channels.get(app.snowflakes.yleinen);
         chan.fetchMessages({limit: 5, before: '547723640637227028'}).then(messages => {
             console.log(messages);

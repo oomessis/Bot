@@ -73,7 +73,7 @@ botClient.on('message', msg => {
 	}
 	
     // Check if message contains links that are not images / media. (Only in dev atm.)
-    if (auth.dev === 1) {
+    if (auth.dev === 2) {
         if (msg.content.includes("https://") || msg.content.includes("http://") && !msg.content.includes(".jpg") && !msg.content.includes(".png") && !msg.content.includes(".gif") && !msg.content.includes(".wmv") && !msg.content.includes(".vob") && !msg.content.includes(".mpg") && !msg.content.includes(".mpeg") && !msg.content.includes(".mp4") && !msg.content.includes(".mov") && !msg.content.includes(".avi") && !msg.content.includes(".bmp") && !msg.content.includes(".ico") && !msg.content.includes(".jpeg") && !msg.content.includes(".svg")) {
     
             // Removes the link from the message, counting the messages characters

@@ -100,21 +100,15 @@ class reactions {
      * @param {*} message
      */
     toimitusPapukaija(channelName, message) {
-        let announcement2 = 'Käyttäjän `' + message.author.username + '` kirjoittama viesti kanavalla `#' + message.channel.name + '` ansaitsi puheenaihe-badgen.\n<' + message.url + '>';
-
-        app.bot.logEvent(announcement2);
-        
-        const ch = app.client.channels.find(ch => ch.name === channelName && ch.guild.id === app.snowflakes.toimitus);
-        if (ch === null) {
-            app.client.channels.filter(ch => ch.id === app.snowflakes.toimituspapukaija).map(async channel => await channel.send(announcement2));
-        } else {
-            ch.send(announcement2);
-        }
+        let announcement = app.common.announcementFromMessage(message);
+        // Automaatio
+        app.bot.logEvent(announcement);
         // Yleinen kanavalle
-        app.client.channels.filter(chYl => chYl.id === app.snowflakes.yleinen).map(async chYleinen => await chYleinen.send(app.common.announcementFromMessage(message)));
+        app.client.channels.filter(chYl => chYl.id === app.snowflakes.yleinen).map(async chYleinen => await chYleinen.send(announcement));
         // Puheenaiheet kanavalle
-        app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(app.common.announcementFromMessage(message)));
+        app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcement));
+        // Toimitusservun puheenaiheet kanavalle
+        app.client.channels.filter(chTo => chTo.id === app.snowflakes.toimituspapukaija).map(async chToimitus => await chToimitus.send(announcement));
     }
-
 }
 module.exports = reactions;

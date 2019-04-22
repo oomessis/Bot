@@ -20,7 +20,7 @@ let lastID = '563811333481562122';
  * @param {*} message 
  */
 function run(message) {
-    if (message.author.username === 'raybarg') {
+    if (message.author.id === app.snowflakes.admin) {
         console.log(app.client.user.id);
         app.bot.getChannels(function (err, channels) {
             if (err) {
