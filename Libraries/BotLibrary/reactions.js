@@ -85,7 +85,7 @@ class reactions {
                 request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
                 request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
                 request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-                request.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
+                request.addParameter('strMessage_text', TYPES.NVarChar, ""); // message.content.substring(0, 1999)
                 request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0, 199));
                 request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
                 con.callProcedure(request);

@@ -43,7 +43,7 @@ class DiscordMessage {
 				cmd.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
 				cmd.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
 				cmd.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-				cmd.addParameter('strMessage_text', TYPES.NVarChar, message.content.substring(0, 1999));
+				cmd.addParameter('strMessage_text', TYPES.NVarChar, "");
 				cmd.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
 				con.callProcedure(cmd);
 			}

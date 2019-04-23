@@ -24,7 +24,7 @@ as
 		message_id=@iMessage_id,
 		message_date=@dtMessage_date,
 		person_name=@strPerson_name,
-		message_text=@strMessage_text,
+		--message_text=@strMessage_text,
 		[user_id]=@iUser_id
 	where message_id = @iMessage_id
 
@@ -35,7 +35,7 @@ as
 			message_id,
 			message_date,
 			person_name,
-			message_text,
+			--message_text,
 			[user_id]
 			)
 		VALUES(
@@ -44,7 +44,7 @@ as
 			@iMessage_id,
 			@dtMessage_date,
 			@strPerson_name,
-			@strMessage_text,
+			--@strMessage_text,
 			@iUser_id
 			)
 
