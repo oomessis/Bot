@@ -15,7 +15,7 @@ const properties = {
  * @param {*} message 
  */
 function run(message) {
-    if (message.author.username === 'raybarg') {
+    if (message.author.id === app.snowflakes.admin) {
         let target = app.client.guilds.get(app.snowflakes.messis);
         console.log(target);
         target.members.filter(m => !m.user.bot && !m.roles.has(app.snowflakes.yleisrooli)).map(async member => await member.addRole(app.snowflakes.yleisrooli).catch(console.error));

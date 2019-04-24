@@ -18,7 +18,7 @@ const properties = {
  * @param {*} message 
  */
 function run(message) {
-    if (message.author.username === 'raybarg') {
+    if (message.author.id === app.snowflakes.admin) {
         app.client.guilds.forEach((guild) => {
             if (guild.id === app.snowflakes.messis) {
                 let spam = '';

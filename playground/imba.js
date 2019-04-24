@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 const PImage = require('pureimage');
 const fs = require('fs');
 const snowflakes = require('./../auth/snowflakes.json');
-const app = require("./../bot.js");
+const app = require("../bot.js");
 const linksimages = require("./../assets/linksimages.json");
 
 const properties = {
