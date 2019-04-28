@@ -11,7 +11,7 @@ class commonClass {
 	 */
 	static announcementFromMessage(message) {
 		let content = message.content.split('`').join(''); // Embediin viestisisältö josta stripattu embedimerkit
-		return 'Kanavalla: ' + message.channel + ' ' + 'käyttäjältä: '+  message.author + '\n<' + message.url + '>' +  '\n```' + content + '```';
+		return 'Kanavalla: ' + message.channel + ' ' + 'käyttäjä: '+  message.author + '\n<' + message.url + '>' +  '\n```' + content + '```';
 	}
 
 	/**

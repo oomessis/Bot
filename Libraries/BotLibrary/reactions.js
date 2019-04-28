@@ -5,7 +5,11 @@ const Connection = require('tedious').Connection;
 const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
 const app = require("./../../bot.js");
+const badges = require('./../DatabaseLibrary/Badges.js');
 
+/**
+ * Reaktioiden käsittely
+ */
 class reactions {
     /**
      * Reaktion lisäyksen käsittely
@@ -16,23 +20,33 @@ class reactions {
         let sourceGuild = packet.d.guild_id;
         let channel = app.client.channels.get(packet.d.channel_id);
         let member = guild.members.get(packet.d.user_id);
-        if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild) || member.roles.has(app.snowflakes.paimen)) {
-            channel.fetchMessage(packet.d.message_id).then(message => {
-                //const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
-                //const reaction = message.reactions.get(emoji);
+        channel.fetchMessage(packet.d.message_id).then(message => {
+            if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild) || member.roles.has(app.snowflakes.paimen)) {
+                // Reaktion on joko:
+                // - Tuotantotiimiläisen antama
+                // - Rooliriippumattomasti annettu tuotantotiimin tiimiservuilla
+                // - Paimenen antama
+
+                // Puheenaihe-badge
                 if (packet.d.emoji.name === 'juttu') {
-                    app.bot.parroExists(message.author.id, message.id, function(err, parrotID) {
-                        if (err) {
-                            console.log(err);
-                        } else {
-                            if(parrotID === -1) {
-                                let me = new reactions();
-                                me.saveParrot(message, channel.id);
-                                me.toimitusPapukaija(channel.name, message);
-                            }
-                        }
-                    });
-                } else if (packet.d.emoji.name === 'tietohallinto') {
+                    badges.saveConversation(message);
+                    let me = new reactions();
+                    me.puheenaiheIlmoitukset(message);
+
+                } else if (packet.d.emoji.name === 'idea') {
+                    badges.saveIdea(message);
+                    let me = new reactions();
+                    me.ideaIlmoitukset(message);
+
+                } else if (packet.d.emoji.name === 'lainaus') {
+                    badges.saveQuote(message);
+                    let me = new reactions();
+                    me.quoteIlmoitukset(message);
+                } 
+            }
+            if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild)) {
+                // Reaktio on tuotantotiimiläisen antama tai tuotantotiimin tiimiservuilla annettu
+                if (packet.d.emoji.name === 'tietohallinto') {
                     app.client.channels.filter(
                         ch => ch.id === app.snowflakes.channels.find(e => e.name === 'TietohallintoFeed').id
                     ).map(
@@ -57,50 +71,16 @@ class reactions {
                         async channelPh => await channelPh.send(app.common.announcementFromMessage(message))
                     );
                 }
-            });
-        }
-    }
-
-    /**
-     * Tallentaa yhden papukaijan tietokantaan
-     * @param {*} message Viestin olio
-     */
-    saveParrot(message, channelID) {
-        let con = new Connection(app.sqlConfig);
-        con.on('connect', function (err) {
-            if (err) {
-                console.log(err);
-            } else {
-                let request = new Request('up_upd_parrot', function (err) {
-                    if (err) {
-                        console.log(err);
-                    }
-                    con.close();
-                });
-                // Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-                let d = message.createdAt;
-                let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-                request.addParameter('iParrot_id', TYPES.Int, 0);
-                request.addParameter('iUser_id', TYPES.NVarChar, message.author.id);
-                request.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-                request.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
-                request.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
-                request.addParameter('strMessage_text', TYPES.NVarChar, ""); // message.content.substring(0, 1999)
-                request.addParameter('strMessage_url', TYPES.NVarChar, message.url.substring(0, 199));
-                request.addParameter('iChannel_id', TYPES.NVarChar, channelID.toString());
-                con.callProcedure(request);
             }
         });
     }
 
     /**
-     * Badgeviesti toimitukselle & yhteisölle
-     * @param {*} channelName
-     * @param {*} announcement
+     * Puheenaihe-badgesta ilmoitus toimitukselle & yhteisölle
      * @param {*} message
      */
-    toimitusPapukaija(channelName, message) {
-        let announcement = app.common.announcementFromMessage(message);
+    puheenaiheIlmoitukset(message) {
+        let announcement = "Puheenaihebadge ansaittu. " + app.common.announcementFromMessage(message);
         // Automaatio
         app.bot.logEvent(announcement);
         // Yleinen kanavalle
@@ -109,6 +89,26 @@ class reactions {
         app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcement));
         // Toimitusservun puheenaiheet kanavalle
         app.client.channels.filter(chTo => chTo.id === app.snowflakes.toimituspapukaija).map(async chToimitus => await chToimitus.send(announcement));
+    }
+
+    /**
+     * Idea-badgesta ilmoitus yhteisölle
+     * @param {*} message 
+     */
+    ideaIlmoitukset(message) {
+        let announcement = "Ideabadge ansaittu. " + app.common.announcementFromMessage(message);
+        // Ideat kanavalle
+        app.client.channels.filter(ch => ch.id === app.snowflakes.ideakanava).map(async chIdea => await chIdea.send(announcement));
+    }
+
+    /**
+     * Quote-badgesta ilmoitus toimitukselle
+     * @param {*} message 
+     */
+    quoteIlmoitukset(message) {
+        let announcement = "Quotebadge ansaittu. " + app.common.announcementFromMessage(message);
+        // Quotet kanavalle
+        app.client.channels.filter(ch => ch.id === app.snowflakes.quotekanava).map(async chQuote => await chQuote.send(announcement));
     }
 }
 module.exports = reactions;
