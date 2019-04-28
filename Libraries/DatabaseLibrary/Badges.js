@@ -6,7 +6,7 @@ const enum_badge = require('../../assets/badges.json');
 const app = require("./../../bot.js");
 
 /**
- * Badge tietokantatoiminnallisuudet
+ * Badge ilmoitus & tietokantatoiminnallisuudet
  */
 class Badges {
 
@@ -21,6 +21,7 @@ class Badges {
                 if(badgeID === -1) {
                     app.bot.logEvent("Puheenaihebadge käyttäjälle: " + message.author.username + " tallennettu kantaan.");
                     badge._save(enum_badge.puheenaihe, message);
+                    badge._puheenaiheIlmoitukset(message);
                 }
             }
         });
@@ -37,6 +38,7 @@ class Badges {
                 if(badgeID === -1) {
                     app.bot.logEvent("Ideabadge käyttäjälle: " + message.author.username + " tallennettu kantaan.");
                     badge._save(enum_badge.idea, message);
+                    badge._ideaIlmoitukset(message);
                 }
             }
         });
@@ -53,6 +55,7 @@ class Badges {
                 if(badgeID === -1) {
                     app.bot.logEvent("Lainausbadge käyttäjälle: " + message.author.username + " tallennettu kantaan.");
                     badge._save(enum_badge.lainaus, message);
+                    badge._quoteIlmoitukset(message);
                 }
             }
         });
@@ -124,5 +127,42 @@ class Badges {
             }
         });
     }
+
+    /**
+     * Puheenaihe-badgesta ilmoitus toimitukselle & yhteisölle
+     * @param {*} message
+     */
+    _puheenaiheIlmoitukset(message) {
+        let announcement = "Puheenaihebadge ansaittu. " + app.common.announcementFromMessage(message);
+        // Automaatio
+        app.bot.logEvent(announcement);
+        // Yleinen kanavalle
+        app.client.channels.filter(chYl => chYl.id === app.snowflakes.yleinen).map(async chYleinen => await chYleinen.send(announcement));
+        // Puheenaiheet kanavalle
+        app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcement));
+        // Toimitusservun puheenaiheet kanavalle
+        app.client.channels.filter(chTo => chTo.id === app.snowflakes.toimituspapukaija).map(async chToimitus => await chToimitus.send(announcement));
+    }
+
+    /**
+     * Idea-badgesta ilmoitus yhteisölle
+     * @param {*} message 
+     */
+    _ideaIlmoitukset(message) {
+        let announcement = "Ideabadge ansaittu. " + app.common.announcementFromMessage(message);
+        // Ideat kanavalle
+        app.client.channels.filter(ch => ch.id === app.snowflakes.ideakanava).map(async chIdea => await chIdea.send(announcement));
+    }
+
+    /**
+     * Quote-badgesta ilmoitus toimitukselle
+     * @param {*} message 
+     */
+    _quoteIlmoitukset(message) {
+        let announcement = "Quotebadge ansaittu. " + app.common.announcementFromMessage(message);
+        // Quotet kanavalle
+        app.client.channels.filter(ch => ch.id === app.snowflakes.quotekanava).map(async chQuote => await chQuote.send(announcement));
+    }
+
 }
 module.exports = Badges;
