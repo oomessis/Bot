@@ -145,7 +145,7 @@ class Badges {
     }
 
     /**
-     * Idea-badgesta ilmoitus yhteisölle
+     * Idea-badgesta ilmoitus yhteisölle 
      * @param {*} message 
      */
     _ideaIlmoitukset(message) {

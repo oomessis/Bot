@@ -7,7 +7,9 @@
   "dependencies": {
     "discord.js": "^11.4.2",
     "flatted": "^2.0.0",
+    "googleapis": "^39.2.0",
     "minimist": "^1.2.0",
+    "moment": "^2.24.0",
     "pureimage": "^0.1.6",
     "request": "^2.88.0",
     "tedious": "^3.0.1",
