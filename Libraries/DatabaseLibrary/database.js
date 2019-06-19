@@ -250,3 +250,7 @@ class DataBase {
 
 }
 module.exports = DataBase;
+module.exports.Connection = Connection;
+module.exports.Request = Request;
+module.exports.sqlConfig = sqlConfig;
+module.exports.TYPES = TYPES;
