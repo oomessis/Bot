@@ -37,8 +37,8 @@ class reactions {
                 } else if (packet.d.emoji.name === 'lainaus') {
                     badges.saveQuote(message);
                 } 
-            }
-            if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild)) {
+                
+                // Myös paimen voi antaa agenda-badgeja
                 // Reaktio on tuotantotiimiläisen antama tai tuotantotiimin tiimiservuilla annettu
                 if (packet.d.emoji.name === 'tietohallinto') {
                     app.client.channels.filter(
