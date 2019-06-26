@@ -11,7 +11,7 @@ const properties = {
 };
 
 function run(message, args) {
-    if (typeof args[1] !== 'undefined') {
+    if (typeof args[1] !== 'undefined' && message.channel.id !== app.snowflakes.aula) {
         let bPrivate = message.channel instanceof app.discord.DMChannel;
         let strPaikkakunta = args[1];
         let channels = app.client.channels.filter(ch => ch.parentID === app.snowflakes.categoryPaikkakunnat && ch.name.toLowerCase() === strPaikkakunta.toLowerCase());

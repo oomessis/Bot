@@ -31,3 +31,5 @@ BEGIN
 
     RETURN
 END
+
+--drop function dbo.split
