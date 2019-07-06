@@ -62,6 +62,22 @@ class Badges {
     }
 
     /**
+     * Tallentaa yhden kultainen sydän-badgen tietokantaan
+     * @param {*} message 
+     */
+    static saveGoldenHeart(message) {
+        let badge = new Badges();
+        badge._exists(enum_badge.kultainensydan, message.author.id, message.id, function(err, badgeID) {
+            if (err) { console.log(err); } else {
+                if(badgeID === -1) {
+                    badge._save(enum_badge.kultainensydan, message);
+                    badge._goldenHeartIlmoitukset(message);
+                }
+            }
+        });
+    }
+
+    /**
      * Varsinainen Badgen tallennus kantaan
      * @param {*} type 
      * @param {*} message 
@@ -164,5 +180,13 @@ class Badges {
         app.client.channels.filter(ch => ch.id === app.snowflakes.quotekanava).map(async chQuote => await chQuote.send(announcement));
     }
 
+    /**
+     * Kultainen sydän-badgesta ilmoitus toimitukselle
+     * @param {*} message 
+     */
+    _goldenHeartIlmoitukset(message) {
+        let announcement = "Kultainen sydän ansaittu. " + app.common.announcementFromMessage(message);
+        app.client.channels.filter(ch => ch.id === app.snowflakes.kultainensydankanava).map(async chGoldenHeart => await chGoldenHeart.send(announcement));
+    }    
 }
 module.exports = Badges;

@@ -36,7 +36,11 @@ class reactions {
 
                 } else if (packet.d.emoji.name === 'lainaus') {
                     badges.saveQuote(message);
-                } 
+
+                } else if (packet.d.emoji.name === 'kultainensydan') {
+                    badges.saveGoldenHeart(message);
+                    
+                }
                 
                 // Myös paimen voi antaa agenda-badgeja
                 // Reaktio on tuotantotiimiläisen antama tai tuotantotiimin tiimiservuilla annettu
