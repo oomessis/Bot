@@ -65,6 +65,15 @@ class commonClass {
 		} else {
 			return false;
 		}
-	}	
+	}
+
+	/**
+	 * Oma purkkaviritys datestringille
+	 * @param {*} d 
+	 */
+	static toISODateString(d) {
+		if (!d)	return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+		return d;
+	}
 }
 module.exports = commonClass;

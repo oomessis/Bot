@@ -15,7 +15,6 @@ const properties = {
  * @param {*} message 
  */
 function run(message) {
-	app.bot.logEvent("Statistiikkaa käyttäjälle: " + app.common.getDisplayName(message));
     app.bot.messageCount(function (err, totalAllChannels) {
         if (err) {
             console.log(err);

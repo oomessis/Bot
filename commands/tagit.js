@@ -29,15 +29,15 @@ function run(message, args) {
                 });
             } else {
                 // Find user by name
-                let oUser = app.client.users.find(user => user.username.toLowerCase() == strUser.toLowerCase());
-                if (!oUser) {
+                let oMember = guild.members.find(member => member.displayName.toLowerCase() === strUser);
+                if (!oMember) {
                     // Try find user by ID
-                    oUser = app.client.users.find(user => user.id === strUser);
+                    oMember = guild.members.find(member => member.id === strUser);
                 }
-                if (oUser) {
+                if (oMember) {
                     // Save/Update user in DB
-                    messisUser.save(oUser.id, oUser.username, function(err, iState) {
-                        messisUser.getUserByDiscordID(oUser.id, function (err, oMessisUser) {
+                    messisUser.save(oMember.id, oMember.displayName, oMember.joinedAt, function(err, iState) {
+                        messisUser.getUserByDiscordID(oMember.id, function (err, oMessisUser) {
                             if (err) {
                                 console.log(err);
                             } else {

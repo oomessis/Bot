@@ -1,3 +1,4 @@
+const app = require("./../../bot.js");
 const dataBase = require('./database.js');
 
 /**
@@ -8,6 +9,7 @@ class MessisUser {
         this.ID = 0;
         this.DiscordUserID = '';
         this.DiscordUserName = '';
+        this.DiscordJoinedAt = '';
     }
 
     /**
@@ -45,7 +47,7 @@ class MessisUser {
      * @param {*} userId 
      * @param {*} userName 
      */
-    static save(userId, userName, callback) {
+    static save(userId, userName, joinedAt, callback) {
         let con = new dataBase.Connection(dataBase.sqlConfig);
         con.on('error', function(err) {
 			console.log('Connection error: \n' + err);
@@ -62,10 +64,11 @@ class MessisUser {
 					}
                     con.close();
                     callback(null, 1);
-				});
+                });
                 cmd.addParameter('iMessis_user_id', dataBase.TYPES.Int, 0);
 				cmd.addParameter('strDiscord_user_id', dataBase.TYPES.NVarChar, userId);
-				cmd.addParameter('strDiscord_user_name', dataBase.TYPES.NVarChar, userName);
+                cmd.addParameter('strDiscord_user_name', dataBase.TYPES.NVarChar, userName);
+                cmd.addParameter('dtDiscord_joined_at', dataBase.TYPES.DateTime2, app.common.toISODateString(joinedAt));
                 con.callProcedure(cmd);
 			}
 		});

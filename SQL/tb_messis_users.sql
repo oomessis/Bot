@@ -14,7 +14,8 @@ BEGIN
 		[messis_user_id] [int] IDENTITY(1,1) NOT NULL		-- Own identity
 			CONSTRAINT pk_messis_user_id PRIMARY KEY ,
 		[discord_user_id] nvarchar(50) NOT NULL,			-- user Discord ID
-		[discord_user_name] nvarchar(50) NOT NULL			-- user name
+		[discord_user_name] nvarchar(50) NOT NULL,			-- user name
+		[discord_joined_at] datetime						-- user joined at date from Discord
 	) ON [primary]
 END
 GO

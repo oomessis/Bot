@@ -10,23 +10,27 @@ go
 CREATE PROCEDURE [dbo].[up_upd_messis_user]
 	@iMessis_user_id INT OUTPUT,
 	@strDiscord_User_id nvarchar(50),
-	@strDiscord_User_name nvarchar(50)
+	@strDiscord_User_name nvarchar(50),
+	@dtDiscord_joined_at datetime
 as
 
 	UPDATE messis_users SET
-		discord_user_id=@strDiscord_User_id,
-		discord_user_name=@strDiscord_User_name
+		discord_user_id = @strDiscord_User_id,
+		discord_user_name = @strDiscord_User_name,
+		discord_joined_at = @dtDiscord_joined_at
 		
 	where discord_user_id = @strDiscord_User_id
 
 	IF @@rowcount = 0 BEGIN
 		INSERT INTO messis_users(
 			discord_user_id,
-			discord_user_name
+			discord_user_name,
+			discord_joined_at
 			)
 		VALUES(
 			@strDiscord_User_id,
-			@strDiscord_User_name
+			@strDiscord_User_name,
+			@dtDiscord_joined_at
 			)
 
 		-- Haetaan luotu oma identity
