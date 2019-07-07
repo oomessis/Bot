@@ -13,32 +13,38 @@ const properties = {
 
 function run(message, args) {
     if (typeof args[1] !== 'undefined') {
-        if (args[1] === 'lista') {
-            ignoredChannels.getIgnoredChannels(function(err, channels) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    let embed = new app.discord.RichEmbed();
-                    let channelList = '';
+        let guild = app.client.guilds.get(app.snowflakes.messis);
+        let member = guild.members.get(message.author.id);
+        if (message.author.id === app.snowflakes.admin || member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito)) {
 
-                    embed.setTitle('Tilastoissa ei huomioida kanavia:');
-                    embed.setAuthor(app.client.user.username, app.client.user.displayAvatarURL);
+            if (args[1] === 'lista') {
+                ignoredChannels.getIgnoredChannels(function(err, channels) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        let embed = new app.discord.RichEmbed();
+                        let channelList = '';
+    
+                        embed.setTitle('Tilastoissa ei huomioida kanavia:');
+                        embed.setAuthor(app.client.user.username, app.client.user.displayAvatarURL);
+    
+                        channels.forEach(element => {
+                            channelList += `${element[0].value} - **${element[1].value}** \n`;
+                        });
+                        embed.setDescription(channelList);
+                        message.channel.send(embed).then(sentMsg => {
+                        });    
+                    }
+                });
+            } else {
+                ignoredChannels.save(args[1], function(err, status) {
+                    if (status === 1) {
+                        message.channel.send(`**${args[1]}** tallennus suoritettu.`);
+                    }
+                });
+            }
 
-                    channels.forEach(element => {
-                        channelList += `${element[0].value} - **${element[1].value}** \n`;
-                    });
-                    embed.setDescription(channelList);
-                    message.channel.send(embed).then(sentMsg => {
-                    });    
-                }
-            });
-        } else {
-            ignoredChannels.save(args[1], function(err, status) {
-                if (status === 1) {
-                    message.channel.send(`**${args[1]}** tallennus suoritettu.`);
-                }
-            });
-        }
+        } 
     }
 }
 exports.properties = properties;
