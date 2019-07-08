@@ -195,7 +195,7 @@ class BotCommon {
      * @param {*} msg
      */
     logEvent(msg) {
-        //this._Client.channels.filter(ch => ch.id === snowflakes.automaatio).map(async channel => await channel.send(msg));
+        this._Client.channels.filter(ch => ch.id === snowflakes.automaatio).map(async channel => await channel.send(msg));
     }
 }
 module.exports = BotCommon;
