@@ -202,7 +202,7 @@ class Badges {
             if (err) {
                 return callback(err);
             } else {
-                this._request = new Request("select case when mu.discord_user_name is not null then mu.discord_user_name else messis_badges.person_name end as person, eb.badge_name, messis_badges.message_date, messis_badges.message_url from  messis_badges left outer join messis_users mu on mu.discord_user_id = messis_badges.user_id inner join enum_badges eb on eb.badge_type = messis_badges.badge_type where  user_id = @strUserID order by messis_badges.badge_type, messis_badges.message_date", function(err, rowCount, rows) {
+                this._request = new Request("select case when mu.discord_user_name is not null then mu.discord_user_name else messis_badges.person_name end as person, eb.badge_name, messis_badges.message_date, messis_badges.message_url, messis_badges.message_text from messis_badges left outer join messis_users mu on mu.discord_user_id = messis_badges.user_id inner join enum_badges eb on eb.badge_type = messis_badges.badge_type where  user_id = @strUserID order by messis_badges.badge_type, messis_badges.message_date", function(err, rowCount, rows) {
                     if (err) {
                         return callback(err);
                     }
@@ -210,6 +210,28 @@ class Badges {
                     callback(null, retval);
                 });
                 this._request.addParameter('strUserID', TYPES.NVarChar, userID);
+                this._request.on('row', function(columns) {
+                    retval.push(columns);
+                });
+                con.execSql(this._request);
+            }
+        });
+    }
+
+    static getAllBadgeMessageIDs(callback) {
+        var retval = [];
+        var con = new Connection(sqlConfig);
+        con.on('connect', function(err) {
+            if (err) {
+                return callback(err);
+            } else {
+                this._request = new Request("select channel_id, message_id, badge_type from messis_badges where message_text is null and user_id <> '1'", function(err, rowCount, rows) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    con.close();
+                    callback(null, retval);
+                });
                 this._request.on('row', function(columns) {
                     retval.push(columns);
                 });

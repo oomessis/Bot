@@ -19,19 +19,26 @@ const properties = {
  */
 function run(message, args) {
     let userID = '';
-    if (typeof args[1] !== 'undefined') {
-        if (args[1] === 'ohje') {
-            listHelpText(message);
-        } else {
-            userID = findUserID(args[1]);
-        }
+    if (message.channel.id !== app.snowflakes.skynetterminal && !(message.channel instanceof app.discord.DMChannel)) {
+        message.channel.send('Badgekomento toimii toistaiseksi vain skynet-terminal kanavalla tai yksityisviestissä.').then(sentMsg => {
+            message.delete(20000);
+            sentMsg.delete(20000);
+        });
     } else {
-        // List user badges
-        userID = message.author.id;
-    }
-
-    if (userID !== '') {
-        listUserBadges(message, userID);
+        if (typeof args[1] !== 'undefined') {
+            if (args[1] === 'ohje') {
+                listHelpText(message);
+            } else {
+                userID = findUserID(args[1]);
+            }
+        } else {
+            // List user badges
+            userID = message.author.id;
+        }
+    
+        if (userID !== '') {
+            listUserBadges(message, userID);
+        }
     }
 }
 
@@ -97,6 +104,9 @@ function listUserBadges(message, userID) {
                 let dt = moment(element[2].value);
                 let strDt = dt.format('D.M.YYYY');
                 strList += `${strDt} : ${element[3].value} \n`;
+                if (element[4].value !== '') {
+                    strList += "```" + element[4].value.split('`').join('') + "``` \n";
+                }
 
                 if (strList.length > 1700) {
                     message.channel.send(strList);

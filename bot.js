@@ -15,7 +15,7 @@ const botClient = new Discord.Client();
 bot.botClient = botClient;
 
 // Automation
-const automation = require('./Libraries/BotLibrary/automation.js');
+//const automation = require('./Libraries/BotLibrary/automation.js');
 //const automate = new automation(snowflakes.automatesheetid);
 
 // Command and Event handlers.
