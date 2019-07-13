@@ -21,7 +21,6 @@ function run(message, args) {
     let userID = '';
     if (message.channel.id !== app.snowflakes.skynetterminal && !(message.channel instanceof app.discord.DMChannel)) {
         message.channel.send('Badgekomento toimii toistaiseksi vain skynet-terminal kanavalla tai yksityisviestissä.').then(sentMsg => {
-            message.delete(20000);
             sentMsg.delete(20000);
         });
     } else {
