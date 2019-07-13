@@ -86,7 +86,7 @@ function listEvents(message, auth) {
     let embed = new app.discord.RichEmbed();
 
     calendar.events.list({
-        calendarId: 'cofr.ee_2l7ndggm9uk152hekmdv6jubng@group.calendar.google.com',
+        calendarId: app.snowflakes.calendarid,
         timeMin: startOfWeek.toISOString(),
         timeMax: endOfWeek.toISOString(),
         maxResults: 10,

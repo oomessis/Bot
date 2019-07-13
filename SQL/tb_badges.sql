@@ -19,7 +19,8 @@ BEGIN
 		[user_id] nvarchar(50) NOT NULL,			-- server ID
 		[person_name] nvarchar(50) NOT NULL,		-- Message author name
 		[message_date] datetime NOT NULL,			-- Message date
-		[message_url] nvarchar(200) NULL			-- Message Url
+		[message_url] nvarchar(200) NULL,			-- Message Url
+		[message_text] nvarchar(200) COLLATE Finnish_Swedish_CI_AS NULL			-- 200 characters from the beginning of Message text
 	) ON [primary]
 END
 GO

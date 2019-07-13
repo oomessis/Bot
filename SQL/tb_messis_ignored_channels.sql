@@ -13,7 +13,7 @@ BEGIN
 	CREATE table [dbo].[messis_ignored_channels] (			
 		[messis_ignored_channel_id] [int] IDENTITY(1,1) NOT NULL		-- Own identity
 			CONSTRAINT pk_messis_ignored_channel_id PRIMARY KEY ,
-		[discord_channel_id] nvarchar(50) NOT NULL			-- Discord channel ID
+		[discord_channel_id] nvarchar(50) COLLATE Finnish_Swedish_CI_AS NOT NULL 			-- Discord channel ID
 	) ON [primary]
 END
 GO

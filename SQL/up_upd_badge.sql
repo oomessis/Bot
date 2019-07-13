@@ -16,7 +16,8 @@ CREATE PROCEDURE [dbo].[up_upd_badge]
 	@iUser_id nvarchar(50),
 	@strPerson_name nvarchar(50),
 	@dtMessage_date datetime,
-	@strMessage_url nvarchar(200)
+	@strMessage_url nvarchar(200),
+	@strMessage_text nvarchar(200)
 as
 
 	UPDATE messis_badges SET
@@ -27,7 +28,8 @@ as
 		[user_id]=@iUser_id,
 		person_name=@strPerson_name,
 		message_date=@dtMessage_date,
-		message_url=@strMessage_url
+		message_url=@strMessage_url,
+		message_text=@strMessage_text
 		
 	where [user_id] = @iUser_id and message_id = @iMessage_id and badge_type = @iBadge_type
 
@@ -40,7 +42,8 @@ as
 			[user_id],
 			person_name,
 			message_date,
-			message_url
+			message_url,
+			message_text
 			)
 		VALUES(
 			@iBadge_type,
@@ -50,7 +53,8 @@ as
 			@iUser_id,
 			@strPerson_name,
 			@dtMessage_date,
-			@strMessage_url
+			@strMessage_url,
+			@strMessage_text
 			)
 
 		-- Haetaan luotu oma identity
