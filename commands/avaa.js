@@ -32,7 +32,9 @@ function run(message, args) {
                     ch.overwritePermissions(message.author.id, {
                         VIEW_CHANNEL: true,
                         SEND_MESSAGES: true,
-                        READ_MESSAGE_HISTORY: true
+                        READ_MESSAGE_HISTORY: true,
+                        EMBED_LINKS: true,
+	                    ATTACH_FILES: true
                     }, 'Bottikomento');
                     const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` lisätty.';
                     if (bPrivate) {
