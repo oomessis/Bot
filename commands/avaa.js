@@ -34,7 +34,8 @@ function run(message, args) {
                         SEND_MESSAGES: true,
                         READ_MESSAGE_HISTORY: true,
                         EMBED_LINKS: true,
-	                    ATTACH_FILES: true
+                        ATTACH_FILES: true,
+                        ADD_REACTIONS: true
                     }, 'Bottikomento');
                     const reply = 'Oikeudet kanavalle `' + strPaikkakunta + '` lisätty.';
                     if (bPrivate) {
