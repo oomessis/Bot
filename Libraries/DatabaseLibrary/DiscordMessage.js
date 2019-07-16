@@ -39,7 +39,7 @@ class DiscordMessage {
 				cmd.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
 				cmd.addParameter('iDiscord_message_id', TYPES.Int, 0);
 				cmd.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-				cmd.addParameter('dtMessage_date', TYPES.DateTime2, moment.utc(msg.createdAt).tz("Europe/Helsinki").format('YYYY-M-D H:m:s'));
+				cmd.addParameter('dtMessage_date', TYPES.DateTime2, moment.utc(message.createdAt).tz("Europe/Helsinki").format('YYYY-M-D H:m:s'));
 				cmd.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
 				cmd.addParameter('strMessage_text', TYPES.NVarChar, "");
 				cmd.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
