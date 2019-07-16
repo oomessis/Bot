@@ -3,7 +3,7 @@ const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
 const sqlConfig = require('../../auth/azureauth.json');
 const snowflakes = require('../../auth/snowflakes.json');
-const momentz = require('moment-timezone');
+const moment = require('moment');
 
 
 class DiscordMessage {
@@ -35,19 +35,11 @@ class DiscordMessage {
 					}
 					con.close();
 				});
-
-				let dtm = momentz(message.createdAt, "Europe/London");
-				let d = message.createdAt; //dtm.tz("Europe/Helsinki").toDate();
-				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-				let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-				//console.log(message.createdAt);
-				//console.log(dateString);
-				
 				cmd.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
 				cmd.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
 				cmd.addParameter('iDiscord_message_id', TYPES.Int, 0);
 				cmd.addParameter('iMessage_id', TYPES.NVarChar, message.id.toString());
-				cmd.addParameter('dtMessage_date', TYPES.DateTime2, dateString);
+				cmd.addParameter('dtMessage_date', TYPES.DateTime2, moment.utc(msg.createdAt).tz("Europe/Helsinki").format('YYYY-M-D H:m:s'));
 				cmd.addParameter('strPerson_name', TYPES.NVarChar, message.author.username);
 				cmd.addParameter('strMessage_text', TYPES.NVarChar, "");
 				cmd.addParameter('iUser_id', TYPES.NVarChar, message.author.id.toString());
