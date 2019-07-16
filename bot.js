@@ -76,7 +76,7 @@ botClient.on('message', msg => {
 	console.log(dateString);
 	console.log("---");
 	console.log(moment.utc(msg.createdAt).format());
-	console.log(moment.utc(msg.createdAt).tz("Europe/Helsinki").format());
+	console.log(moment.utc(msg.createdAt).tz("Europe/Helsinki").format('YYYY-M-D H:m:s'));
 
 	// Reaaliaikainen syncronointi
 	if (!(msg.channel instanceof Discord.DMChannel) && auth.dev === 0) {
