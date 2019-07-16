@@ -11,6 +11,7 @@
     "lodash": "^4.17.14",
     "minimist": "^1.2.0",
     "moment": "^2.24.0",
+    "moment-timezone": "^0.5.26",
     "pureimage": "^0.1.6",
     "request": "^2.88.0",
     "tedious": "^3.0.1",

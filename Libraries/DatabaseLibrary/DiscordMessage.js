@@ -3,6 +3,7 @@ const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
 const sqlConfig = require('../../auth/azureauth.json');
 const snowflakes = require('../../auth/snowflakes.json');
+const momentz = require('moment-timezone');
 
 
 class DiscordMessage {
@@ -34,9 +35,12 @@ class DiscordMessage {
 					}
 					con.close();
 				});
-				let d = message.createdAt;
+
+				let dtm = momentz(msg.createdAt);
+				let d = dtm.toDate();
 				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
 				let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+				
 				cmd.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
 				cmd.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());
 				cmd.addParameter('iDiscord_message_id', TYPES.Int, 0);
