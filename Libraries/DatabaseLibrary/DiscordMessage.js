@@ -37,11 +37,11 @@ class DiscordMessage {
 				});
 
 				let dtm = momentz(message.createdAt, "Europe/London");
-				let d = dtm.tz("Europe/Helsinki").toDate();
+				let d = message.createdAt; //dtm.tz("Europe/Helsinki").toDate();
 				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
 				let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-				console.log(message.createdAt);
-				console.log(dateString);
+				//console.log(message.createdAt);
+				//console.log(dateString);
 				
 				cmd.addParameter('iServer_id', TYPES.NVarChar, message.guild.id.toString());
 				cmd.addParameter('iChannel_id', TYPES.NVarChar, message.channel.id.toString());

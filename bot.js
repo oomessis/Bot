@@ -8,6 +8,7 @@ const sqlAuth = require('./auth/azureauth.json');
 const BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 const common = require('./Libraries/CommonLibrary/common.js');
 const reactions = require('./Libraries/BotLibrary/reactions.js');
+const momentz = require('moment-timezone');
 
 const bot = new BotCommon();
 const sqlConfig = sqlAuth;
@@ -68,6 +69,15 @@ botClient.on('message', msg => {
 			}
 		}
 	}
+	let dtm = momentz(msg.createdAt);
+	let d = dtm.tz("Europe/Helsinki").toDate();
+	// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
+	let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+	console.log(msg.createdAt);
+	console.log(momentz(msg.createdAt, "Europe/London").format());
+	console.log(momentz(msg.createdAt, "Europe/Helsinki").format());
+	console.log(dateString);
+
 	// Reaaliaikainen syncronointi
 	if (!(msg.channel instanceof Discord.DMChannel) && auth.dev === 0) {
 		if (msg.channel.id !== '532946068967784508' && msg.channel.id !== '524337438462836779' && msg.channel.id !== '502911862606659586') {
