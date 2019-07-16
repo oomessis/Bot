@@ -37,7 +37,7 @@ class DiscordMessage {
 				});
 
 				let dtm = momentz(msg.createdAt);
-				let d = dtm.toDate();
+				let d = dtm.tz("Europe/Helsinki").toDate();
 				// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
 				let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
 				
