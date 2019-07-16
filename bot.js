@@ -70,13 +70,9 @@ botClient.on('message', msg => {
 			}
 		}
 	}
-	let dtm = momentz.utc(msg.createdAt);
-	let d = dtm.tz("Europe/Helsinki").toDate();
+	let d = moment.utc(msg.createdAt).tz("Europe/Helsinki").toDate();
 	// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
 	let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-	console.log(msg.createdAt.toString());
-	console.log(momentz(msg.createdAt, "Europe/London").format());
-	console.log(momentz(msg.createdAt, "Europe/Helsinki").format());
 	console.log(dateString);
 	console.log("---");
 	console.log(moment.utc(msg.createdAt).format());
