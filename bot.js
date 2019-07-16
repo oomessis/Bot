@@ -70,14 +70,6 @@ botClient.on('message', msg => {
 			}
 		}
 	}
-	let d = moment.utc(msg.createdAt).tz("Europe/Helsinki").toDate();
-	// Tehdään itse sopiva datestring muotoa YYYY-MM-DD hh:mm jota mssql syö natiivisti
-	let dateString = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-	console.log(dateString);
-	console.log("---");
-	console.log(moment.utc(msg.createdAt).format());
-	console.log(moment.utc(msg.createdAt).tz("Europe/Helsinki").format('YYYY-M-D H:m:s'));
-
 	// Reaaliaikainen syncronointi
 	if (!(msg.channel instanceof Discord.DMChannel) && auth.dev === 0) {
 		if (msg.channel.id !== '532946068967784508' && msg.channel.id !== '524337438462836779' && msg.channel.id !== '502911862606659586') {
