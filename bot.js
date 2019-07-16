@@ -8,6 +8,7 @@ const sqlAuth = require('./auth/azureauth.json');
 const BotCommon = require('./Libraries/BotLibrary/botcommon.js');
 const common = require('./Libraries/CommonLibrary/common.js');
 const reactions = require('./Libraries/BotLibrary/reactions.js');
+const moment = require('moment');
 const momentz = require('moment-timezone');
 
 const bot = new BotCommon();
@@ -77,6 +78,9 @@ botClient.on('message', msg => {
 	console.log(momentz(msg.createdAt, "Europe/London").format());
 	console.log(momentz(msg.createdAt, "Europe/Helsinki").format());
 	console.log(dateString);
+	console.log("---");
+	console.log(moment.utc(msg.createdAt).format());
+	console.log(moment.utc(msg.createdAt).tz("Europe/Helsinki").format());
 
 	// Reaaliaikainen syncronointi
 	if (!(msg.channel instanceof Discord.DMChannel) && auth.dev === 0) {
