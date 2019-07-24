@@ -44,11 +44,11 @@ botClient.on('raw', packet => {
             reactions.handleReactions(packet);
         }
         if (['GUILD_MEMBER_ADD'].includes(packet.t)) {
-            bot.logEvent('Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.');
+            bot.logEvent('```diff\n-Uusi käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' liittyi serverille.```');
         }
         if (['GUILD_MEMBER_REMOVE'].includes(packet.t)) {
-            bot.logEvent('Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.');
-        }
+            bot.logEvent('```diff\n+Käyttäjä (' + packet.d.user.id + ') ' + packet.d.user.username + ' poistui serveriltä.```');
+		}
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
             //reactions.handleReactions(packet);
