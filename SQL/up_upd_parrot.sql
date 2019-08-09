@@ -23,7 +23,7 @@ as
 		message_id=@iMessage_id,
 		message_date=@dtMessage_date,
 		person_name=@strPerson_name,
-		message_text=@strMessage_text,
+		--message_text=@strMessage_text,
 		message_url=@strMessage_url,
 		channel_id=@iChannel_id
 	where [user_id] = @iUser_id and message_id = @iMessage_id
@@ -34,7 +34,7 @@ as
 			message_id,
 			message_date,
 			person_name,
-			message_text,
+			--message_text,
 			message_url,
 			channel_id
 			)
@@ -43,7 +43,7 @@ as
 			@iMessage_id,
 			@dtMessage_date,
 			@strPerson_name,
-			@strMessage_text,
+			--@strMessage_text,
 			@strMessage_url,
 			@iChannel_id
 			)

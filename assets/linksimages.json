@@ -1,0 +1,18 @@
+{
+    "filter": [{
+        "name": "https://",
+        "include": true
+    }, {
+        "name": "http://",
+        "include": true
+    }, {
+        "name": ".jpg",
+        "include": false
+    }, {
+        "name": ".png",
+        "include": false
+    }, {
+        "name": ".gif",
+        "include": false
+    }]
+}
