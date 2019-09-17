@@ -6,7 +6,7 @@
   "author": "Raybarg",
   "dependencies": {
     "discord.js": "^11.4.2",
-    "flatted": "^2.0.0",
+    "flatted": "^2.0.1",
     "googleapis": "^39.2.0",
     "lodash": "^4.17.14",
     "minimist": "^1.2.0",
