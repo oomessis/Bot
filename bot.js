@@ -52,7 +52,8 @@ botClient.on('raw', packet => {
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
             //reactions.handleReactions(packet);
-        }
+		}
+		//console.log(packet);
     }
 });
 botClient.on('message', msg => {
