@@ -21,17 +21,26 @@ class reactions {
         let channel = app.client.channels.get(packet.d.channel_id);
         let member = guild.members.get(packet.d.user_id);
         channel.fetchMessage(packet.d.message_id).then(message => {
+            if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild) || member.roles.has(app.snowflakes.paimen) || member.roles.has(app.snowflakes.vaikuttaja)) {
+                // Reaktion on joko:
+                // - Tuotantotiimiläisen antama
+                // - Rooliriippumattomasti annettu tuotantotiimin tiimiservuilla
+                // - Paimenen antama
+                // - Vaikuttajan antama
+
+                // Puheenaihe-badge
+                if (packet.d.emoji.name === 'juttu') {
+                    badges.saveConversation(message);
+                }
+            }
+
             if (member.roles.has(app.snowflakes.tuotantotiimi) || member.roles.has(app.snowflakes.yllapito) || app.common.isTuotantotiimiGuild(sourceGuild) || member.roles.has(app.snowflakes.paimen)) {
                 // Reaktion on joko:
                 // - Tuotantotiimiläisen antama
                 // - Rooliriippumattomasti annettu tuotantotiimin tiimiservuilla
                 // - Paimenen antama
 
-                // Puheenaihe-badge
-                if (packet.d.emoji.name === 'juttu') {
-                    badges.saveConversation(message);
-
-                } else if (packet.d.emoji.name === 'idea') {
+                if (packet.d.emoji.name === 'idea') {
                     badges.saveIdea(message);
 
                 } else if (packet.d.emoji.name === 'lainaus') {
@@ -42,7 +51,6 @@ class reactions {
                     
                 }
                 
-                // Myös paimen voi antaa agenda-badgeja
                 // Reaktio on tuotantotiimiläisen antama tai tuotantotiimin tiimiservuilla annettu
                 if (packet.d.emoji.name === 'tietohallinto') {
                     app.client.channels.filter(
