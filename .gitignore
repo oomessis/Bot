@@ -65,3 +65,5 @@ Auth/
 
 #Dev playground
 playground/
+
+commands/test.js

@@ -156,7 +156,9 @@ class Badges {
         // Yleinen kanavalle
         app.client.channels.filter(chYl => chYl.id === app.snowflakes.yleinen).map(async chYleinen => await chYleinen.send(announcement));
         // Puheenaiheet kanavalle
-        app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcement));
+        app.client.channels.filter(chPh => chPh.id === app.snowflakes.puheenaiheet).map(async channelPh => await channelPh.send(announcement).then(sentMsg => {
+            sentMsg.react('👍');
+        }));
         // Toimitusservun puheenaiheet kanavalle
         app.client.channels.filter(chTo => chTo.id === app.snowflakes.toimituspapukaija).map(async chToimitus => await chToimitus.send(announcement));
     }
