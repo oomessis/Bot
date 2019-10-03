@@ -171,6 +171,8 @@ class Badges {
         let announcement = "Ideabadge ansaittu. " + app.common.announcementFromMessage(message);
         // Ideat kanavalle
         app.client.channels.filter(ch => ch.id === app.snowflakes.ideakanava).map(async chIdea => await chIdea.send(announcement));
+        // Tuotantoservulle Käsiteltävät-ideat kanavalle
+        app.client.channels.filter(chTo => chTo.id === app.snowflakes.tuotantokasiteltavatideat).map(async chOhj => await chOhj.send(announcement));    
     }
 
     /**
