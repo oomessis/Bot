@@ -51,7 +51,9 @@ botClient.on('raw', packet => {
 		}
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-            //reactions.handleReactions(packet);
+			if (packet.d.emoji.name === 'mu') {
+				reactions.handleReactions(packet);
+			}
 		}
 		//console.log(packet);
     }

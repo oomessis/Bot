@@ -76,6 +76,12 @@ class reactions {
                     ).map(
                         async channelPh => await channelPh.send(app.common.announcementFromMessage(message))
                     );
+                } else if (packet.d.emoji.name === 'mu') {
+                    app.client.channels.filter(
+                        ch => ch.id === app.snowflakes.channels.find(e => e.name === 'ToimitusUutisFeed').id
+                    ).map(
+                        async channelFeed => await channelFeed.send(app.common.announcementFromMessage(message))
+                    );
                 }
             }
         });
