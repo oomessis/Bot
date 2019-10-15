@@ -11,7 +11,7 @@ const properties = {
 };
 
 function run(message, args) {
-    if (app.common.isTuotantotiimiGuild(message.guild.id)) {
+    if (app.common.isTuotantotiimiGuild(message.guild.id) || (message.guild.id === app.snowflakes.messis && message.channel.id === app.snowflakes.puheenaiheet)) {
         if (typeof args[1] !== 'undefined') {
             let msgID = args[1];
             let txt = message.content.substring(message.content.indexOf("\"") + 1);
