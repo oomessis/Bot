@@ -51,7 +51,7 @@ botClient.on('raw', packet => {
 		}
     } else {
         if (['MESSAGE_REACTION_ADD'].includes(packet.t)) {
-			if (packet.d.emoji.name === 'mu') {
+			if (packet.d.emoji.name === 'idea') {
 				reactions.handleReactions(packet);
 			}
 		}

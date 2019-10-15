@@ -168,7 +168,10 @@ class Badges {
      * @param {*} message 
      */
     _ideaIlmoitukset(message) {
-        let announcement = "Ideabadge ansaittu. " + app.common.announcementFromMessage(message);
+		let content = message.content.split('`').join(''); // Embediin viestisisältö josta stripattu embedimerkit
+        let announcement = message.author + ' heitti idean:\n```' + content + '```\n<' + message.url + '>\n\n';
+        announcement += '👉 Tuotantotiimi on ottanut asian käsittelyyn! Messis-uutiset tulee lähiaikoina kertomaan lisää.';
+
         // Ideat kanavalle
         app.client.channels.filter(ch => ch.id === app.snowflakes.ideakanava).map(async chIdea => await chIdea.send(announcement));
         // Tuotantoservulle Käsiteltävät-ideat kanavalle
