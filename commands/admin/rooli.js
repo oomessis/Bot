@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("../bot.js");
+const app = require("./../../bot.js");
 
 const properties = {
 	command: "rooli",
+    aliases: [],
 	description: "Listaa käyttäjät joilla on kyseinen rooli.",
 	visible: true,
 	arguments: ["<rooli>"]

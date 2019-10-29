@@ -4,10 +4,11 @@
 const Connection = require('tedious').Connection;
 const Request = require('tedious').Request;
 const TYPES = require('tedious').TYPES;
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "channels",
+	aliases: [],
 	description: "Tallennetaan kanavat.",
 	visible: true,
 	arguments: []

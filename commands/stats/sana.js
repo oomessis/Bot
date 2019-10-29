@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "sana",
+	aliases: [],
 	description: "Haetaan lista montako kertaa sana toistuu eri kanavilla.",
 	visible: true,
 	arguments: ["<sana>"]
