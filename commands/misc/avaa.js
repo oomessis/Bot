@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "avaa",
+    aliases: [],
 	description: "Lisää/poistaa annetun paikkakunnan kanavan oikeudet kutsuvalta käyttäjältä, lähettää viestin jos annettua kanavaa ei löytynyt",
 	visible: true,
 	arguments: ["<paikkakunta>"]

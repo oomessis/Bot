@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "avatar",
+    aliases: [],
 	description: "Näyttää avatar urlin käyttäjästä.",
 	visible: true,
 	arguments: ["<käyttäjä>"]

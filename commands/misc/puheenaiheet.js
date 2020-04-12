@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "puheenaiheet",
+    aliases: [],
 	description: "Listaa puheenaiheet.",
 	visible: true,
 	arguments: ["<käyttäjä>"]

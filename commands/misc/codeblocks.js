@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const properties = {
 	command: "codeblocks",
+	aliases: [],
 	description: "Displays code block usage.",
 	visible: true,
 	arguments: []

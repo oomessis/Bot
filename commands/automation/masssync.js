@@ -1,11 +1,12 @@
 /*jslint node: true */
 "use strict";
 
-const discordMessage = require('./../Libraries/DatabaseLibrary/DiscordMessage.js');
-const app = require("./../bot.js");
+const discordMessage = require('../../Libraries/DatabaseLibrary/DiscordMessage.js');
+const app = require("../../bot.js");
 
 const properties = {
 	command: "masssync",
+	aliases: [],
 	description: "Massana tilastoidaan viestit.",
 	visible: true,
 	arguments: []

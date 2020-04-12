@@ -6,13 +6,14 @@ const readline = require('readline');
 const { google } = require('googleapis');
 const moment = require('moment');
 
-const app = require("./../bot.js");
+const app = require("../../bot.js");
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.readonly'];
 const TOKEN_PATH = './auth/token.json';
 
 const properties = {
     command: "calendar",
+    aliases: [],
     description: "",
     visible: true,
     arguments: []

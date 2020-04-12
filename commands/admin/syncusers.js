@@ -1,11 +1,12 @@
 /*jslint node: true */
 "use strict";
 
-const app = require("./../bot.js");
-let messisUser = require("./../Libraries/DatabaseLibrary/MessisUser.js");
+const app = require("./../../bot.js");
+let messisUser = require("./../../Libraries/DatabaseLibrary/MessisUser.js");
 
 const properties = {
 	command: "syncusers",
+    aliases: [],
 	description: "Virkistetään henkilörekisteri.",
 	visible: true,
 	arguments: []

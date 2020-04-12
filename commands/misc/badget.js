@@ -1,12 +1,13 @@
 /*jslint node: true */
 "use strict";
 
-let app = require("./../bot.js");
+let app = require("../../bot.js");
 let moment = require('moment');
-let badges = require("./../Libraries/DatabaseLibrary/Badges.js");
+let badges = require("../../Libraries/DatabaseLibrary/Badges.js");
 
 const properties = {
 	command: "badget",
+    aliases: [],
 	description: "Badgekomennot.",
 	visible: true,
 	arguments: ["<komento>"]

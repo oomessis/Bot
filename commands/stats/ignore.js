@@ -1,11 +1,12 @@
 /*jslint node: true */
 "use strict";
 
-let app = require("../bot.js");
-let ignoredChannels = require("./../Libraries/DatabaseLibrary/IgnoredChannels.js");
+let app = require("../../bot.js");
+let ignoredChannels = require("../../Libraries/DatabaseLibrary/IgnoredChannels.js");
 
 const properties = {
 	command: "ignore",
+    aliases: [],
 	description: "Tilastoinnista suodatettavien kanavien komento.",
 	visible: true,
 	arguments: ["<kanavaID>"]

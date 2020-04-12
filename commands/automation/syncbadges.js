@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
-let app = require("./../bot.js");
-let badges = require("./../Libraries/DatabaseLibrary/Badges.js");
+let app = require("../../bot.js");
+let badges = require("../../Libraries/DatabaseLibrary/Badges.js");
 
 const properties = {
 	command: "syncbadges",
+    aliases: [],
 	description: "Synkronisoidaan badgeviestien sisällöt",
 	visible: true,
 	arguments: []

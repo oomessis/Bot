@@ -21,14 +21,29 @@ bot.botClient = botClient;
 //const automate = new automation(snowflakes.automatesheetid);
 
 // Command and Event handlers.
-let commands = {};
-fs.readdir("./commands", (err, files) => {
-	for (const file of files) {
-		if (file.includes(".js")) {
-			commands[file.replace(".js", "")] = require(`./commands/${file}`);
+botClient.commands = new Discord.Collection(); // Collection for all commands
+botClient.aliases = new Discord.Collection(); // Collection for all aliases of every command
+
+const modules = ['admin', 'automation', 'stats', 'misc']; // This will be the list of the names of all modules (folder) your bot has
+
+modules.forEach(c => {
+	fs.readdir(`./commands/${c}/`, (err, files) => {
+		if (err) console.log(err);
+		const jsfile = files.filter(f => f.split(".").pop() === "js");
+		if(jsfile.length <= 0) {
+			return console.log("[LOGS] Couldn't Find Commands!");
 		}
-	}
+		console.log(`[Commandlogs] Loaded ${files.length} commands of module ${c}`); // When commands of a module are successfully loaded, you can see it in the console
+		files.forEach(f => { // Now we go through all files of a folder (module)
+			const props = require(`./commands/${c}/${f}`); // Location of the current command file
+			botClient.commands.set(props.properties.command, props); // Now we add the commmand in the client.commands Collection which we defined in previous code
+			props.properties.aliases.forEach(alias => {  // It could be that the command has aliases, so we go through them too
+				botClient.aliases.set(alias, props.properties.command); // If we find one, we add it to the client.aliases Collection
+			});
+		});
+	});
 });
+
 botClient.on('ready', () => {
 	if (auth.dev === 0) {
 		botClient.user.setActivity('Komennot: !help');
@@ -58,20 +73,15 @@ botClient.on('raw', packet => {
     }
 });
 botClient.on('message', msg => {
-	// Bottikomennot
-	for (const cmd in commands) {
-		const command = commands[cmd];
-		const properties = command.properties;
-		const args = msg.content.split(" ");
+	const prefix = auth.prefix;
+	const messageArray = msg.content.split(" ");
+	const command = messageArray[0];
+	const properties = command.properties;
+	const args = messageArray.slice(1);
 
-		if (args[0].replace(auth.prefix, "") == properties.command) {
-			if (properties.arguments.length == 0) {
-				command.run(msg);
-			} else {
-				command.run(msg, args);
-			}
-		}
-	}
+	const commandfile = botClient.commands.get(command.slice(prefix.length)) || botClient.commands.get(botClient.aliases.get(command.slice(prefix.length)));
+	if(commandfile) commandfile.run(msg, args);
+
 	// Reaaliaikainen syncronointi
 	if (!(msg.channel instanceof Discord.DMChannel) && auth.dev === 0) {
 		if (msg.channel.id !== '532946068967784508' && msg.channel.id !== '524337438462836779' && msg.channel.id !== '502911862606659586') {

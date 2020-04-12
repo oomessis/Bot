@@ -1,10 +1,11 @@
 /*jslint node: true */
 "use strict";
-let app = require("./../bot.js");
-let automation = require("./../Libraries/BotLibrary/automation.js");
+let app = require("../../bot.js");
+let automation = require("../../Libraries/BotLibrary/automation.js");
 
 const properties = {
 	command: "auto",
+    aliases: [],
 	description: "Automatisoinnin komennot",
 	visible: true,
 	arguments: ["<komento>"]

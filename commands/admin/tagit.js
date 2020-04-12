@@ -1,12 +1,13 @@
 /*jslint node: true */
 "use strict";
 
-let app = require("./../bot.js");
-let messisUser = require("./../Libraries/DatabaseLibrary/MessisUser.js");
-let messisUserTags = require("./../Libraries/DatabaseLibrary/MessisUserTags.js");
+let app = require("../../bot.js");
+let messisUser = require("../../Libraries/DatabaseLibrary/MessisUser.js");
+let messisUserTags = require("../../Libraries/DatabaseLibrary/MessisUserTags.js");
 
 const properties = {
 	command: "tagit",
+    aliases: [],
 	description: "Lisää/poistaa annettuja tageja userille",
 	visible: true,
 	arguments: ["<user> <tagit>"]
