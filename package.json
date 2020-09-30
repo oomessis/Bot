@@ -8,7 +8,7 @@
     "discord.js": "^11.4.2",
     "flatted": "^2.0.0",
     "googleapis": "^39.2.0",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "minimist": "^1.2.3",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
